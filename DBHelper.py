@@ -25,9 +25,17 @@ class DBHelper:
         print("=========================================")
 
     def add(self, uid, image_name, image):
+        """
+        Save an image into db folder
+        :param uid: Artwork composer UID, a string of number
+        :param image_name: image file name, formatted as {pid}_p{No.}.{file-format}
+        :param image: image content stream
+        :return: True if succeed, False if not
+        """
         pid = image_name.split("_")[0]
+        self._update_history(pid)
         if pid in self.pid_to_uid:  # artwork already present
-            return
+            return True
         try:
             save_path = "/".join((ROOT_DIR, DB_FOLDER_NAME, uid)) + "/"
             if not exists(save_path):
@@ -40,13 +48,20 @@ class DBHelper:
             image_writer.close()
         except IOError:
             print(">x> Failure saving image: " + image_name)
+            return False
         else:
             self.pid_to_uid[pid] = uid
             self.size += 1
             self.size_in_bytes += getsize(file_path)
             print(">>> Saved image: " + image_name)
+            return True
 
     def delete(self, pid):
+        """
+        Delete all artworks of given PID
+        :param pid: Pixiv-ID, a string of number
+        :return: None
+        """
         if pid not in self.pid_to_uid:  # artwork not exists
             return
         uid = self.pid_to_uid[pid]
@@ -65,6 +80,7 @@ class DBHelper:
                     self.size -= 1
                     print(">>> Deleted file: " + file_name)
         self.pid_to_uid.pop(pid)
+        self.history.remove(pid)
         if not listdir(uid_path):  # UID folder empty
             try:
                 old_mask = umask(000)  # to get permission on some OS
@@ -76,14 +92,21 @@ class DBHelper:
                 print(">>> Deleted empty UID folder" + uid)
 
     def search(self, pid):
+        """
+        Search for PID
+        :param pid: Pixiv-ID, a string of number
+        :return: list of dirs of files of given pid
+        """
         if pid not in self.pid_to_uid:
             return []
+        self._update_history(pid)
         uid = self.pid_to_uid[pid]
         uid_path = join(self.db_path, uid)
         all_files_under_path = listdir(uid_path)
         return [join(uid_path, file_name) for file_name in all_files_under_path if pid in file_name]
 
     def _scan_db_folder(self):
+        """Re-scan db-folder and re-construct db"""
         self.size_in_bytes = 0
         self.size = 0
         self.pid_to_uid.clear()
@@ -99,8 +122,29 @@ class DBHelper:
                 all_pid.add(pid)
                 self.size_in_bytes += getsize(join(uid_dir, image_name))
                 self.pid_to_uid[pid] = uid
+        self._validate_history()
         print(">>> Updated DB")
         self.print_db_status()
+
+    def _update_history(self, pid):
+        """Update Recent-Used pid, in case of LRU deletion"""
+        if pid in self.history:
+            self.history.remove(pid)
+        self.history.append(pid)
+
+    def _validate_history(self):
+        """De-duplicate and remove bad pid"""
+        history_len = len(self.history)
+        duplicate_checker = set([])
+        for i in range(history_len - 1, -1, -1):
+            pid = self.history[i]
+            if pid in duplicate_checker:
+                self.history.pop(i)
+            else:
+                duplicate_checker.add(pid)
+        for pid in self.history:
+            if pid not in self.pid_to_uid:
+                self.history.remove(pid)
 
 
 db_helper = DBHelper  # Singleton

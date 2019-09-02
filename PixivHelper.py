@@ -17,6 +17,11 @@ class PixivHelper:
 
     @staticmethod
     def get_all_pid_by_uid(uid):
+        """
+        Web-query all artworks' PIDs of a given composer (given by composer's UserID)
+        :param uid: UserID for pixiv, a string of number
+        :return: list of PIDs
+        """
         url = UID_AJAX_TEMPLATE.format(str(uid))
         page = http_obj(url, DEFAULT_HEADER)
         if page.code != 200:
@@ -26,6 +31,11 @@ class PixivHelper:
 
     @staticmethod
     def download_image_by_pid(pid):
+        """
+        Web download images with a given PID
+        :param pid: Pixiv ID, a string of number
+        :return: ToDo: to be re-fined
+        """
         header = DEFAULT_HEADER.copy()
         header["Referer"] = PID_PAGE_TEMPLATE.format(pid)
         url = PID_AJAX_TEMPLATE.format(pid)
