@@ -4,23 +4,22 @@
 
 from Constants import *
 from os.path import *
-from os import makedirs, umask, listdir
+from os import makedirs, umask, listdir, remove, removedirs
 
 
 class DBHelper:
 
     def __init__(self):
         self.db_path = ROOT_DIR + "/" + DB_FOLDER_NAME + "/"
-        self.db = {}  # {uid:set(pid)} ToDo: use SQLite instead
         self.pid_to_uid = {}  # {pid: uid} ToDo: use SQLite instead
         self.size_in_bytes = 0  # data folder size
-        self.size = 0  # artwork quantity
+        self.size = 0  # artworks quantity
         self.history = []  # for LRU check
         self._scan_db_folder()
 
     def print_db_status(self):
         print("============Database Summary=============")
-        print("UID quantity:      ", len(self.db))
+        print("UID quantity:      ", len(listdir(self.db_path)))
         print("Artworks quantity: ", self.size)
         print("Database size:      {:.4f} MB".format(self.size_in_bytes / 1024 / 1024))
         print("=========================================")
@@ -42,19 +41,52 @@ class DBHelper:
         except IOError:
             print(">x> Failure saving image: " + image_name)
         else:
-            if uid not in self.db:
-                self.db[uid] = set([])
-            self.db[uid].add(pid)
             self.pid_to_uid[pid] = uid
             self.size += 1
             self.size_in_bytes += getsize(file_path)
             print(">>> Saved image: " + image_name)
 
+    def delete(self, pid):
+        if pid not in self.pid_to_uid:  # artwork not exists
+            return
+        uid = self.pid_to_uid[pid]
+        uid_path = join(self.db_path, uid)
+        all_files_under_path = listdir(uid_path)
+        for file_name in all_files_under_path:
+            if pid in file_name:
+                file_path = join(uid_path, file_name)
+                file_size = getsize(file_path)
+                try:
+                    remove(file_path)
+                except IOError:
+                    print(">x> Failed to remove image: " + file_name)
+                else:
+                    self.size_in_bytes -= file_size
+                    self.size -= 1
+                    print(">>> Deleted file: " + file_name)
+        self.pid_to_uid.pop(pid)
+        if not listdir(uid_path):  # UID folder empty
+            try:
+                old_mask = umask(000)  # to get permission on some OS
+                removedirs(uid_path)
+                umask(old_mask)  # return permission
+            except IOError:
+                print(">x> Failed to delete empty UID folder " + uid)
+            else:
+                print(">>> Deleted empty UID folder" + uid)
+
+    def search(self, pid):
+        if pid not in self.pid_to_uid:
+            return []
+        uid = self.pid_to_uid[pid]
+        uid_path = join(self.db_path, uid)
+        all_files_under_path = listdir(uid_path)
+        return [join(uid_path, file_name) for file_name in all_files_under_path if pid in file_name]
+
     def _scan_db_folder(self):
         self.size_in_bytes = 0
         self.size = 0
-        self.db = {}
-        self.pid_to_uid = {}
+        self.pid_to_uid.clear()
         all_file_name = listdir(self.db_path)
         all_uid = (folder for folder in all_file_name if isdir(folder))
         for uid in all_uid:
@@ -67,7 +99,6 @@ class DBHelper:
                 all_pid.add(pid)
                 self.size_in_bytes += getsize(join(uid_dir, image_name))
                 self.pid_to_uid[pid] = uid
-            self.db[uid] = all_pid
         print(">>> Updated DB")
         self.print_db_status()
 

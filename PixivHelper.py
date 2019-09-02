@@ -5,35 +5,13 @@
 from urllib import request
 from re import findall
 from Constants import *
-from DBHelper import db_helper
 
 
 def http_obj(url, headers):
     return request.urlopen(request.Request(url, headers=headers, method="GET"))
 
-
 def http(url, headers):
     return request.urlopen(request.Request(url, headers=headers, method="GET")).read().decode("utf-8", "ignore")
-
-
-''' use db_helper instead
-def save_image(uid, image_name, image):
-    save_path = "/".join((ROOT_DIR, DB_FOLDER_NAME, uid)) + "/"
-    if not exists(save_path):
-        old_mask = umask(000)  # to get permission on some OS
-        makedirs(save_path, 0o0755)
-        umask(old_mask)  # return permission
-    file_path = join(save_path, image_name)
-    try:
-        image_writer = open(file_path, "wb")
-        image_writer.write(image)
-        image_writer.close()
-    except IOError:
-        print(">x> Failure saving image: " + file_path)
-    else:
-        print(">>> Saved image: " + image_name)
-'''
-
 
 class PixivHelper:
 
