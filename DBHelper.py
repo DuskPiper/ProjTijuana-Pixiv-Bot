@@ -3,6 +3,8 @@
 # @Author: DuskPiper
 
 from Constants import *
+from PixivArtworks import PixivArtworks
+
 from os.path import *
 from os import makedirs, umask, listdir, remove, removedirs
 import logging
@@ -15,7 +17,7 @@ class DBHelper:
         self.pid_to_uid = {}  # {pid: uid} ToDo: use SQLite instead
         self.size_in_bytes = 0  # data folder size
         self.size = 0  # artworks quantity
-        self.history = []  # for LRU check
+        self.history = []  # for LRU check ToDo: LRU cache cleaning
         self.scan_db_folder()
 
     def print_db_status(self):
@@ -25,37 +27,35 @@ class DBHelper:
         print("Database size:      {:.4f} MB".format(self.size_in_bytes / 1024 / 1024))
         print("=========================================")
 
-    def add(self, uid, image_name, image):
+    def add(self, artworks: PixivArtworks):
         """
         Save an image into db folder
-        :param uid: Artwork composer UID, a string of number
-        :param image_name: image file name, formatted as {pid}_p{No.}.{file-format}
-        :param image: image content stream
+        :param artworks: all artworks of same PID
         :return: True if succeed, False if not
         """
-        pid = image_name.split("_")[0]
-        self._update_history(pid)
-        if pid in self.pid_to_uid:  # artwork already present
+        self._update_history(artworks.pid)
+        if artworks.pid in self.pid_to_uid:  # artwork already present
             return True
-        try:
-            save_path = "/".join((ROOT_DIR, DB_FOLDER_NAME, uid)) + "/"
-            if not exists(save_path):
-                old_mask = umask(000)  # to get permission on some OS
-                makedirs(save_path, 0o0755)
-                umask(old_mask)  # return permission
-            file_path = join(save_path, image_name)
-            image_writer = open(file_path, "wb")
-            image_writer.write(image)
-            image_writer.close()
-        except IOError:
-            logging.error("Failure saving image: " + image_name)
-            return False
-        else:
-            self.pid_to_uid[pid] = uid
-            self.size += 1
-            self.size_in_bytes += getsize(file_path)
-            logging.info("Saved image: " + image_name)
-            return True
+        save_path = "/".join((ROOT_DIR, DB_FOLDER_NAME, artworks.uid)) + "/"
+        if not exists(save_path):
+            old_mask = umask(000)  # to get permission on some OS
+            makedirs(save_path, 0o0755)
+            umask(old_mask)  # return permission
+        for image_name, image in artworks.artworks.items():
+            try:
+                file_path = join(save_path, image_name)
+                image_writer = open(join(save_path, image_name), "wb")
+                image_writer.write(image)
+                image_writer.close()
+            except IOError:  # ToDo: bug, may save some of artworks and fail to save other
+                logging.error("Failure saving image: " + image_name)
+                return False
+            else:
+                self.size += 1
+                self.size_in_bytes += getsize(file_path)
+                logging.info("Saved image: " + image_name)
+        self.pid_to_uid[artworks.pid] = artworks.uid
+        return True
 
     def delete(self, pid):
         """
@@ -148,4 +148,5 @@ class DBHelper:
                 self.history.remove(pid)
 
 
-# db_helper = DBHelper  # Singleton
+db = DBHelper()  # Singleton
+logging.info("Database initialized")

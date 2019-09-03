@@ -2,8 +2,7 @@
 # -*- encoding: utf-8 -*-
 # @Author: DuskPiper
 
-from os.path import dirname
-from os.path import abspath
+from os.path import dirname, abspath
 from enum import Enum
 
 DEFAULT_HEADER = {
@@ -17,6 +16,7 @@ DEFAULT_HEADER = {
 PID_PAGE_TEMPLATE = "https://www.pixiv.net/member_illust.php?mode=medium&illust_id={}"
 PID_AJAX_TEMPLATE = "https://www.pixiv.net/touch/ajax/illust/details?illust_id={}"
 UID_AJAX_TEMPLATE = "https://www.pixiv.net/ajax/user/{}/profile/all"
+PIXIV_SHORT_LINK_TEMPLATE = "pixiv.net/i/{}"
 
 ROOT_DIR = dirname(abspath(__file__))
 DB_FOLDER_NAME = "db"
@@ -30,9 +30,12 @@ class ExitCode(Enum):
 class BotMsg(Enum):
     WELCOME = "Welcome to Piper-Pixiv Bot, " \
               "I am here to help you look for artworks from pixiv.net easily\n" \
-              "To see all supported commands, press /help "
+              "To see all supported commands, use /help "
     HELP = "Below are commands I can understand\n" \
-           "/help   show this message again\n" \
-           "/pid    send you artworks of given PixivIDn\n" \
-           "/uid    send you all PixivIDs of given pixiv account\n\n\n" \
+           "/help        show this message again\n" \
+           "/pid [PID]   send you artworks of given PixivID\n" \
+           "/uid [UID]   send you all PixivIDs of given pixiv account\n\n\n" \
            "More functions to be delivered soon, enjoy!"
+    WARN_EMPTY_PID = "Please send me a PixivID number after \"/pid\" "
+    WARN_MULTI_PID = "Multiple PIDs currently supported"
+    ERR_PID_NOT_FOUND = "PixivID query failure, please check PID validity"

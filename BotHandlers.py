@@ -3,16 +3,19 @@
 # @Author: DuskPiper
 
 from PixivHelper import PixivHelper
-from DBHelper import DBHelper
-from Constants import BotMsg
+from DBHelper import db
+from Constants import *
+from PixivArtworks import PixivArtworks
+
 import logging
+from re import findall
 
 
 class BotHandlers:
 
     @staticmethod
     def start(bot, update):
-        bot.sendMessage(
+        bot.send_message(
             text=BotMsg.WELCOME,
             chat_id=update.message.chat_id,
             reply_to_message_id=update.message.message_id
@@ -21,9 +24,65 @@ class BotHandlers:
 
     @staticmethod
     def help(bot, update):
-        bot.sendMessage(
+        bot.send_message(
             text=BotMsg.HELP,
             chat_id=update.message.chat_id,
             reply_to_message_id=update.message.message_id
         )
 
+    @staticmethod
+    def pid(bot, update, args):
+        pid = str(args)
+
+        # validate pid
+        if not pid:
+            bot.send_message(
+                text=BotMsg.WARN_EMPTY_PID,
+                chat_id=update.message.chat_id,
+                reply_to_message_id=update.message.message_id
+            )
+            logging.debug("/pid command rejected: " + pid)
+            return
+        if " " in pid or "," in pid:
+            bot.send_message(
+                text=BotMsg.WARN_MULTI_PID,
+                chat_id=update.message.chat_id,
+                reply_to_message_id=update.message.message_id
+            )
+            logging.debug("/pid command rejected: " + pid)
+            return
+        pid = findall(r"\d", pid)
+        photo_caption = PIXIV_SHORT_LINK_TEMPLATE.format(pid)
+
+        # get image locally
+        artworks_dir = db.search(pid)
+        if artworks_dir:  # found file locally
+            for image_dir in artworks_dir:
+                bot.send_photo(
+                    photo=open(image_dir, "rb"),
+                    caption=photo_caption,
+                    chat_id=update.message.chat_id
+                )
+            logging.info("/pid {} success".format(pid))
+            return
+
+        # get image from Pixiv API
+        artworks: PixivArtworks = PixivHelper.download_artworks_by_pid(pid)
+        if not artworks or not artworks.artworks:  # web query failure
+            bot.send_message(
+                text=BotMsg.ERR_PID_NOT_FOUND,
+                chat_id=update.message.chat_id,
+                reply_to_message_id=update.message.message_id
+            )
+            logging.debug("/pid command rejected: PID query failure")
+            return
+        else:  # web query succeed
+            for image_name, image in artworks.artworks.items():
+                bot.send_photo(
+                    photo=image,
+                    caption=photo_caption,
+                    chat_id=update.message.chat_id
+                )
+            db.add(artworks)
+            logging.info("/pid {} success".format(pid))
+            return
