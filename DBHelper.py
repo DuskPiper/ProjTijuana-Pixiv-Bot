@@ -112,7 +112,7 @@ class DBHelper:
         self.size = 0
         self.pid_to_uid.clear()
         all_file_name = listdir(self.db_path)
-        all_uid = (folder for folder in all_file_name if isdir(folder))
+        all_uid = (folder for folder in all_file_name if isdir(join(self.db_path, folder)))
         for uid in all_uid:
             all_pid = set([])
             uid_dir = join(self.db_path, uid)
@@ -154,4 +154,5 @@ logging.info("Database initialized")
 if __name__ == "__main__":
     import PixivHelper
     test_pid = "74542813"
-    db.add(PixivHelper.PixivHelper.download_artworks_by_pid(test_pid))
+    # db.add(PixivHelper.PixivHelper.download_artworks_by_pid(test_pid))
+    print(db.pid_to_uid)

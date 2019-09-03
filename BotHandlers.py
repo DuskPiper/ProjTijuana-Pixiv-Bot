@@ -38,7 +38,8 @@ class BotHandlers:
 
     @staticmethod
     def pid(update: Update, context: CallbackContext):
-        # validate pid
+
+        # Validate pid
         if not context.args:
             context.bot.send_message(
                 text=BotMsg.WARN_EMPTY_PID,
@@ -48,7 +49,7 @@ class BotHandlers:
             logging.debug("/pid command rejected: lacking args")
             return
         pid = context.args[0]
-        if " " in pid or "," in pid:
+        if len(context.args) > 1 or "," in pid:
             context.bot.send_message(
                 text=BotMsg.WARN_MULTI_PID,
                 chat_id=update.message.chat_id,
@@ -56,10 +57,25 @@ class BotHandlers:
             )
             logging.debug("/pid command rejected: " + pid)
             return
-        pid = findall(r"\d", pid)
+        pid = "".join(findall(r"\d", pid))
         photo_caption = PIXIV_SHORT_LINK_TEMPLATE.format(pid)
 
-        # get image locally
+        # Try find image locally, if N/A then call API to download
+        artworks_dir = db.search(pid)
+        if not artworks_dir:  # not found locally, query API
+            artworks: PixivArtworks = PixivHelper.download_artworks_by_pid(pid)
+            if not artworks or not artworks.artworks:  # web query failure
+                context.bot.send_message(
+                    text=BotMsg.ERR_PID_NOT_FOUND,
+                    chat_id=update.message.chat_id,
+                    reply_to_message_id=update.message.message_id
+                )
+                logging.debug("/pid command rejected: PID query failure")
+                return
+            else:  # web query succeed, write to local db
+                db.add(artworks)
+
+        # Get image locally
         artworks_dir = db.search(pid)
         if artworks_dir:  # found file locally
             for image_dir in artworks_dir:
@@ -68,26 +84,5 @@ class BotHandlers:
                     caption=photo_caption,
                     chat_id=update.message.chat_id
                 )
-            logging.info("/pid {} success".format(pid))
-            return
-
-        # get image from Pixiv API
-        artworks: PixivArtworks = PixivHelper.download_artworks_by_pid(pid)
-        if not artworks or not artworks.artworks:  # web query failure
-            context.bot.send_message(
-                text=BotMsg.ERR_PID_NOT_FOUND,
-                chat_id=update.message.chat_id,
-                reply_to_message_id=update.message.message_id
-            )
-            logging.debug("/pid command rejected: PID query failure")
-            return
-        else:  # web query succeed
-            for image_name, image in artworks.artworks.items():
-                context.bot.send_photo(
-                    photo=image,
-                    caption=photo_caption,
-                    chat_id=update.message.chat_id
-                )
-            db.add(artworks)
             logging.info("/pid {} success".format(pid))
             return

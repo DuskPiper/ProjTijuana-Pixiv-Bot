@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 # @Author: DuskPiper
-# @Version: 0.1.1
+# @Version: 0.1.2
 
 from Constants import *
 from BotHandlers import BotHandlers
@@ -14,7 +14,7 @@ import logging
 # Config logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
+    level=logging.DEBUG
 )
 
 # Load token
