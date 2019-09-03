@@ -5,6 +5,7 @@
 from Constants import *
 from os.path import *
 from os import makedirs, umask, listdir, remove, removedirs
+import logging
 
 
 class DBHelper:
@@ -15,7 +16,7 @@ class DBHelper:
         self.size_in_bytes = 0  # data folder size
         self.size = 0  # artworks quantity
         self.history = []  # for LRU check
-        self._scan_db_folder()
+        self.scan_db_folder()
 
     def print_db_status(self):
         print("============Database Summary=============")
@@ -47,13 +48,13 @@ class DBHelper:
             image_writer.write(image)
             image_writer.close()
         except IOError:
-            print(">x> Failure saving image: " + image_name)
+            logging.error("Failure saving image: " + image_name)
             return False
         else:
             self.pid_to_uid[pid] = uid
             self.size += 1
             self.size_in_bytes += getsize(file_path)
-            print(">>> Saved image: " + image_name)
+            logging.info("Saved image: " + image_name)
             return True
 
     def delete(self, pid):
@@ -74,11 +75,11 @@ class DBHelper:
                 try:
                     remove(file_path)
                 except IOError:
-                    print(">x> Failed to remove image: " + file_name)
+                    logging.error("Failed to remove image: " + file_name)
                 else:
                     self.size_in_bytes -= file_size
                     self.size -= 1
-                    print(">>> Deleted file: " + file_name)
+                    logging.info("Deleted file: " + file_name)
         self.pid_to_uid.pop(pid)
         self.history.remove(pid)
         if not listdir(uid_path):  # UID folder empty
@@ -87,9 +88,9 @@ class DBHelper:
                 removedirs(uid_path)
                 umask(old_mask)  # return permission
             except IOError:
-                print(">x> Failed to delete empty UID folder " + uid)
+                logging.error("Failed to delete empty UID folder " + uid)
             else:
-                print(">>> Deleted empty UID folder" + uid)
+                logging.info("Deleted empty UID folder" + uid)
 
     def search(self, pid):
         """
@@ -105,7 +106,7 @@ class DBHelper:
         all_files_under_path = listdir(uid_path)
         return [join(uid_path, file_name) for file_name in all_files_under_path if pid in file_name]
 
-    def _scan_db_folder(self):
+    def scan_db_folder(self):
         """Re-scan db-folder and re-construct db"""
         self.size_in_bytes = 0
         self.size = 0
@@ -123,7 +124,7 @@ class DBHelper:
                 self.size_in_bytes += getsize(join(uid_dir, image_name))
                 self.pid_to_uid[pid] = uid
         self._validate_history()
-        print(">>> Updated DB")
+        logging.info("Updated DB")
         self.print_db_status()
 
     def _update_history(self, pid):
@@ -147,4 +148,4 @@ class DBHelper:
                 self.history.remove(pid)
 
 
-db_helper = DBHelper  # Singleton
+# db_helper = DBHelper  # Singleton
