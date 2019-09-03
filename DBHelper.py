@@ -22,7 +22,7 @@ class DBHelper:
 
     def print_db_status(self):
         print("============Database Summary=============")
-        print("UID quantity:      ", len(listdir(self.db_path)))
+        print("UID quantity:      ", len(set(self.pid_to_uid.values())))
         print("Artworks quantity: ", self.size)
         print("Database size:      {:.4f} MB".format(self.size_in_bytes / 1024 / 1024))
         print("=========================================")
@@ -47,7 +47,7 @@ class DBHelper:
                 image_writer = open(join(save_path, image_name), "wb")
                 image_writer.write(image)
                 image_writer.close()
-            except IOError:  # ToDo: bug, may save some of artworks and fail to save other
+            except IOError:  # ToDo: BUG, may save some of artworks and fail to save other
                 logging.error("Failure saving image: " + image_name)
                 return False
             else:
@@ -150,3 +150,8 @@ class DBHelper:
 
 db = DBHelper()  # Singleton
 logging.info("Database initialized")
+
+if __name__ == "__main__":
+    import PixivHelper
+    test_pid = "74542813"
+    db.add(PixivHelper.PixivHelper.download_artworks_by_pid(test_pid))

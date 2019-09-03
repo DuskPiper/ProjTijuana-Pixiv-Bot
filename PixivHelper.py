@@ -43,10 +43,10 @@ class PixivHelper:
         header = DEFAULT_HEADER.copy()
         header["Referer"] = PID_PAGE_TEMPLATE.format(pid)
         url = PID_AJAX_TEMPLATE.format(pid)
-        res = http(url, header)
-        all_raw_image_url = set(findall('"url_big":"[^"]*"', res))
+        result = http(url, header)
+        all_raw_image_url = set(findall('"url_big":"[^"]*"', result))
         all_image_url = [str(iurl.replace('\\', '').split(':', 1)[-1]).strip('"') for iurl in all_raw_image_url]
-        uid = str(findall('"user_id":"[^"]*"', res)[0].split(':', 1)[-1].strip('"'))
+        uid = str(findall('"user_id":"[^"]*"', result)[0].split(':', 1)[-1].strip('"'))
         artworks = PixivArtworks(pid, uid)
         for image_url in all_image_url:
             image = http_obj(image_url, header)
