@@ -61,4 +61,6 @@ class PixivHelper:
 if __name__ == "__main__":
     test_uid = "11246082"
     test_pid = "74542813"
-
+    res = PixivHelper.download_artworks_by_pid(test_pid)
+    if res:
+        print(res.artworks.keys())

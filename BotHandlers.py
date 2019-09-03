@@ -9,13 +9,19 @@ from PixivArtworks import PixivArtworks
 
 import logging
 from re import findall
+from telegram.ext import CallbackContext
+from telegram.update import Update
 
 
 class BotHandlers:
 
     @staticmethod
-    def start(bot, update):
-        bot.send_message(
+    def error_handler(update: Update, context: CallbackContext):
+        logging.error("An error occurred! Update {} caused {} error.".format(update.update_id, context.error))
+
+    @staticmethod
+    def start(update: Update, context: CallbackContext):
+        context.bot.send_message(
             text=BotMsg.WELCOME,
             chat_id=update.message.chat_id,
             reply_to_message_id=update.message.message_id
@@ -23,28 +29,27 @@ class BotHandlers:
         logging.info("New user: " + str(update.message.chat_id))
 
     @staticmethod
-    def help(bot, update):
-        bot.send_message(
+    def help(update: Update, context: CallbackContext):
+        context.bot.send_message(
             text=BotMsg.HELP,
             chat_id=update.message.chat_id,
             reply_to_message_id=update.message.message_id
         )
 
     @staticmethod
-    def pid(bot, update, args):
-        pid = str(args)
-
+    def pid(update: Update, context: CallbackContext):
         # validate pid
-        if not pid:
-            bot.send_message(
+        if not context.args:
+            context.bot.send_message(
                 text=BotMsg.WARN_EMPTY_PID,
                 chat_id=update.message.chat_id,
                 reply_to_message_id=update.message.message_id
             )
-            logging.debug("/pid command rejected: " + pid)
+            logging.debug("/pid command rejected: lacking args")
             return
+        pid = context.args[0]
         if " " in pid or "," in pid:
-            bot.send_message(
+            context.bot.send_message(
                 text=BotMsg.WARN_MULTI_PID,
                 chat_id=update.message.chat_id,
                 reply_to_message_id=update.message.message_id
@@ -58,7 +63,7 @@ class BotHandlers:
         artworks_dir = db.search(pid)
         if artworks_dir:  # found file locally
             for image_dir in artworks_dir:
-                bot.send_photo(
+                context.bot.send_photo(
                     photo=open(image_dir, "rb"),
                     caption=photo_caption,
                     chat_id=update.message.chat_id
@@ -69,7 +74,7 @@ class BotHandlers:
         # get image from Pixiv API
         artworks: PixivArtworks = PixivHelper.download_artworks_by_pid(pid)
         if not artworks or not artworks.artworks:  # web query failure
-            bot.send_message(
+            context.bot.send_message(
                 text=BotMsg.ERR_PID_NOT_FOUND,
                 chat_id=update.message.chat_id,
                 reply_to_message_id=update.message.message_id
@@ -78,7 +83,7 @@ class BotHandlers:
             return
         else:  # web query succeed
             for image_name, image in artworks.artworks.items():
-                bot.send_photo(
+                context.bot.send_photo(
                     photo=image,
                     caption=photo_caption,
                     chat_id=update.message.chat_id
