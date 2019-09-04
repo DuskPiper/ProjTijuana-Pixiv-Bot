@@ -36,7 +36,7 @@ class BotMsg:
     HELP = "Below are commands I can understand\n" \
            "/help        show this message again\n" \
            "/pid [PID]   send you artworks of given PixivID\n" \
-           "/uid [UID]   send you all PixivIDs of given pixiv account\n\n\n" \
+           "/uid [UID]   send you recent PixivIDs of given pixiv account\n\n\n" \
            "More functions to be delivered soon, enjoy!"
 
     CMD_PID_WARN_EMPTY_PID = "Please send me a PixivID number after \"/pid\" "
