@@ -24,7 +24,7 @@ class DBHelper:
         print("============Database Summary=============")
         print("UID quantity:      ", len(set(self.pid_to_uid.values())))
         print("Artworks quantity: ", self.size)
-        print("Database size:      {:.4f} MB".format(self.size_in_bytes / 1024 / 1024))
+        print("Database size:      {:.2f} MB".format(self.size_in_bytes / 1024 / 1024))
         print("=========================================")
 
     def add(self, artworks: PixivArtworks):
@@ -96,7 +96,7 @@ class DBHelper:
         """
         Search for PID
         :param pid: Pixiv-ID, a string of number
-        :return: list of dirs of files of given pid
+        :return: list of dirs of files of given pid, sorted by #p
         """
         if pid not in self.pid_to_uid:
             return []
@@ -104,7 +104,7 @@ class DBHelper:
         uid = self.pid_to_uid[pid]
         uid_path = join(self.db_path, uid)
         all_files_under_path = listdir(uid_path)
-        return [join(uid_path, file_name) for file_name in all_files_under_path if pid in file_name]
+        return sorted([join(uid_path, file_name) for file_name in all_files_under_path if pid in file_name])
 
     def scan_db_folder(self):
         """Re-scan db-folder and re-construct db"""
@@ -129,7 +129,7 @@ class DBHelper:
 
     def _update_history(self, pid):
         """Update Recent-Used pid, in case of LRU deletion"""
-        if pid in self.history:
+        while pid in self.history:
             self.history.remove(pid)
         self.history.append(pid)
 
@@ -155,4 +155,4 @@ if __name__ == "__main__":
     import PixivHelper
     test_pid = "74542813"
     # db.add(PixivHelper.PixivHelper.download_artworks_by_pid(test_pid))
-    print(db.pid_to_uid)
+    print(db.search(test_pid))

@@ -17,7 +17,10 @@ class BotHandlers:
 
     @staticmethod
     def error_handler(update: Update, context: CallbackContext):
-        logging.error("An error occurred! Update {} caused {} error.".format(update.update_id, context.error))
+        logging.error("An error occurred! Update {} caused {} error.".format(
+            update.update_id if update else "[Null Updater]",
+            context.error
+        ))
 
     @staticmethod
     def start(update: Update, context: CallbackContext):

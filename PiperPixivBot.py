@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 # @Author: DuskPiper
-# @Version: 0.1.2
+# @Version: 0.1.3
 
 from Constants import *
 from BotHandlers import BotHandlers

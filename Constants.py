@@ -32,9 +32,9 @@ class BotMsg:
               "I am here to help you look for artworks from pixiv.net easily" \
               "To see all supported commands, use /help "
     HELP = "Below are commands I can understand\n" \
-           "`/help        show this message again`\n" \
-           "`/pid [PID]   send you artworks of given PixivID`\n" \
-           "`/uid [UID]   send you all PixivIDs of given pixiv account`\n\n\n" \
+           "/help        show this message again\n" \
+           "/pid [PID]   send you artworks of given PixivID\n" \
+           "/uid [UID]   send you all PixivIDs of given pixiv account\n\n\n" \
            "More functions to be delivered soon, enjoy!"
     WARN_EMPTY_PID = "Please send me a PixivID number after \"/pid\" "
     WARN_MULTI_PID = "Multiple PIDs currently supported"
