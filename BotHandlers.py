@@ -64,9 +64,12 @@ class BotHandlers:
         photo_caption = PIXIV_SHORT_LINK_TEMPLATE.format(pid)
 
         # Try find image locally, if N/A then call API to download
+        print("searching locally")
         artworks_dir = db.search(pid)
         if not artworks_dir:  # not found locally, query API
+            print("searching online")
             artworks: PixivArtworks = PixivHelper.download_artworks_by_pid(pid)
+            print("downloaded")
             if not artworks or not artworks.artworks:  # web query failure
                 context.bot.send_message(
                     text=BotMsg.ERR_PID_NOT_FOUND,
@@ -77,15 +80,18 @@ class BotHandlers:
                 return
             else:  # web query succeed, write to local db
                 db.add(artworks)
+                print("saved")
 
         # Get image locally
         artworks_dir = db.search(pid)
         if artworks_dir:  # found file locally
             for image_dir in artworks_dir:
+                print("sending" + image_dir)
                 context.bot.send_photo(
                     photo=open(image_dir, "rb"),
                     caption=photo_caption,
                     chat_id=update.message.chat_id
                 )
+                print("sent" + image_dir)
             logging.info("/pid {} success".format(pid))
             return
