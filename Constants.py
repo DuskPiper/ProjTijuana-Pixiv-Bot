@@ -22,6 +22,8 @@ ROOT_DIR = dirname(abspath(__file__))
 DB_FOLDER_NAME = "db"
 TOKEN_FILE_NAME = "token"
 
+UID_MODE_LIMIT = 5  # maximum PIDs queried
+
 
 class ExitCode(Enum):
     TOKEN_FILE_NOT_FOUND = 0x1100
@@ -36,6 +38,12 @@ class BotMsg:
            "/pid [PID]   send you artworks of given PixivID\n" \
            "/uid [UID]   send you all PixivIDs of given pixiv account\n\n\n" \
            "More functions to be delivered soon, enjoy!"
-    WARN_EMPTY_PID = "Please send me a PixivID number after \"/pid\" "
-    WARN_MULTI_PID = "Multiple PIDs currently supported"
-    ERR_PID_NOT_FOUND = "PixivID query failure, please check PID validity"
+
+    CMD_PID_WARN_EMPTY_PID = "Please send me a PixivID number after \"/pid\" "
+    CMD_PID_WARN_MULTI_PID = "Multiple PIDs currently unsupported"
+    CMD_PID_ERR_PID_NOT_FOUND = "PixivID query failure, please check PID validity"
+
+    CMD_UID_WARN_EMPTY_UID = "Please send me a Pixiv UserID number after \"/uid\" "
+    CMD_UID_WARN_MULTI_UID = "Multiple UIDs currently unsupported"
+    CMD_UID_ERR_UID_NOT_FOUND = "Pixiv user-ID query failure, please check UID validity"
+    CMD_UID_INFO_LIMIT_REACHED = "Only showing recent {} PixivID results".format(UID_MODE_LIMIT)

@@ -37,6 +37,7 @@ dispatcher.add_error_handler(BotHandlers.error_handler)
 dispatcher.add_handler(CommandHandler("start", BotHandlers.start))
 dispatcher.add_handler(CommandHandler("help", BotHandlers.help))
 dispatcher.add_handler(CommandHandler("pid", BotHandlers.pid))
+dispatcher.add_handler(CommandHandler("uid", BotHandlers.uid))
 
 # Run bot
 updater.start_polling()
