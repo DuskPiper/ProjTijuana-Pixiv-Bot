@@ -14,6 +14,10 @@ class DBHelper:
 
     def __init__(self):
         self.db_path = ROOT_DIR + "/" + DB_FOLDER_NAME + "/"
+        if not exists(self.db_path):
+            old_mask = umask(000)  # to get permission on some OS
+            makedirs(self.db_path, 0o0755)
+            umask(old_mask)  # return permission
         self.pid_to_uid = {}  # {pid: uid} ToDo: use SQLite instead
         self.size_in_bytes = 0  # data folder size
         self.size = 0  # artworks quantity

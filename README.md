@@ -18,18 +18,24 @@ Currently available commands are listed below.
 
 #### 0.3.1
 
+**beta3.1**
+
+- fix bug: crush on first run
+
+#### 0.3.0
+
 **beta3**
 
 - stability improvements 
 
-#### 0.2.1
+#### 0.2.0
 
 **beta2**
 
 - new function: `/uid` command
 - bug fix
 
-#### 0.1.1
+#### 0.1.0
 
 **beta1**
 
