@@ -14,6 +14,21 @@ Currently available commands are listed below.
 - `/pid + ____` Download and send you all artworks of a given Pixiv-ID
 - `/uid + ____` Download and send you 5 most recent Pixiv-IDs' artworks
 
+## Using Instructions
+
+#### To run the bot
+
+1. Required environments
+   - Linux/Windows/Mac-OSX system
+   - Python 3.x installed
+   - [Python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot#installing) installed
+   - Gigabytes of disk space (auto-cache cleaning to be developed soon)
+2. To run
+   - Open Terminal at folder
+   - `python PiperPixivBot.py`
+3. To maintain
+   - Come back occasionally and try cleaning database folder (`./db/`) by deleting some files on your own preference
+
 ## Versions
 
 #### 0.3.1
@@ -41,5 +56,16 @@ Currently available commands are listed below.
 
 - initial release
 
+## Future Plans / `ToDo` List
 
+#### Front End
+
+- `/search` 
+- Original quality artworks
+
+####Back End
+
+- Auto cache cleaning, based on LRU
+- Multithreading
+- MySQL
 
