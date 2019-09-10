@@ -42,6 +42,7 @@ Currently available commands are listed below.
 **beta3.2**
 
 - New feature: use `/downpid` to download the original size of artworks of PixivID
+- Combine pictures of same PixivID to one message
 
 #### 0.3.1
 
@@ -73,8 +74,6 @@ Currently available commands are listed below.
 #### Front End
 
 - `/search` 
-- Original quality artworks
-- Combine pictures of same PixivID to one message
 
 ####Back End
 
