@@ -11,6 +11,7 @@ import logging
 from re import findall
 from telegram.ext import CallbackContext
 from telegram.update import Update
+from telegram import TelegramError
 
 
 class BotHandlers:
@@ -41,6 +42,9 @@ class BotHandlers:
 
     @staticmethod
     def pid(update: Update, context: CallbackContext):
+        """
+        Send artworks of pid, image size compressed by telegram
+        """
 
         # Validate pid
         if not context.args:
@@ -92,6 +96,9 @@ class BotHandlers:
 
     @staticmethod
     def uid(update: Update, context: CallbackContext):
+        """
+        Send recent artworks of uid, image size compressed by telegram
+        """
 
         # Validate uid
         if not context.args:
@@ -154,3 +161,63 @@ class BotHandlers:
                         chat_id=update.message.chat_id
                     )
         logging.info("/uid {} success".format(uid))
+
+    @staticmethod
+    def downpid(update: Update, context: CallbackContext):
+        """
+        Download by pid, send original sized image file by pid
+        """
+
+        # Validate pid
+        if not context.args:
+            context.bot.send_message(
+                text=BotMsg.CMD_PID_WARN_EMPTY_PID,
+                chat_id=update.message.chat_id,
+                reply_to_message_id=update.message.message_id
+            )
+            logging.debug("/pid command rejected: lacking args")
+            return
+        pid = context.args[0]
+        if len(context.args) > 1 or "," in pid:
+            context.bot.send_message(
+                text=BotMsg.CMD_PID_WARN_MULTI_PID,
+                chat_id=update.message.chat_id,
+                reply_to_message_id=update.message.message_id
+            )
+            logging.debug("/pid command rejected: " + pid)
+            return
+        pid = "".join(findall(r"\d", pid))
+
+        print(">>> CMD /downpid", pid)
+        # Try find image locally, if N/A then call API to download
+        artworks_dir = db.search(pid)
+        if not artworks_dir:  # not found locally, query API
+            artworks: PixivArtworks = PixivHelper.download_artworks_by_pid(pid)
+            if not artworks or not artworks.artworks:  # web query failure
+                context.bot.send_message(
+                    text=BotMsg.CMD_PID_ERR_PID_NOT_FOUND,
+                    chat_id=update.message.chat_id,
+                    reply_to_message_id=update.message.message_id
+                )
+                logging.debug("/pid command rejected: PID query failure")
+                return
+            else:  # web query succeed, write to local db
+                db.add(artworks)
+
+        # Get image locally
+        artworks_dir = db.search(pid)
+        if artworks_dir:  # found file locally
+            for image_dir in artworks_dir:
+                try:
+                    context.bot.send_document(
+                        document=open(image_dir, "rb"),
+                        chat_id=update.message.chat_id
+                    )
+                except TelegramError:
+                    context.bot.send_message(
+                        text= BotMsg.CMD_DOWNPID_ERR_FAIL_TO_SEND,
+                        chat_id=update.message.chat_id
+                    )
+            logging.info("/pid {} success".format(pid))
+            return
+

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 # @Author: DuskPiper
-# @Version: 0.3.1
+# @Version: 0.3.2
 
 from Constants import *
 from BotHandlers import BotHandlers
@@ -38,6 +38,7 @@ dispatcher.add_handler(CommandHandler("start", BotHandlers.start))
 dispatcher.add_handler(CommandHandler("help", BotHandlers.help))
 dispatcher.add_handler(CommandHandler("pid", BotHandlers.pid))
 dispatcher.add_handler(CommandHandler("uid", BotHandlers.uid))
+dispatcher.add_handler(CommandHandler("downpid", BotHandlers.downpid))
 
 # Run bot
 updater.start_polling()

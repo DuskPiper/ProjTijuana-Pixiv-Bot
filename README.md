@@ -25,17 +25,23 @@ Currently available commands are listed below.
    - Gigabytes of disk space (auto-cache cleaning to be developed soon)
    
 2. To run
-   
+  
    - Leave your bot token in a file named `token` in project directory
    
    - Open Terminal at folder
-   - `python PiperPixivBot.py`
+   - `$ python PiperPixivBot.py`
    
 3. To maintain
 
    - Come back occasionally and try cleaning database folder (`./db/`) by deleting some files on your own preference
 
 ## Versions
+
+####0.3.2
+
+**beta3.2**
+
+- New feature: use `/downpid` to download the original size of artworks of PixivID
 
 #### 0.3.1
 
@@ -68,6 +74,7 @@ Currently available commands are listed below.
 
 - `/search` 
 - Original quality artworks
+- Combine pictures of same PixivID to one message
 
 ####Back End
 

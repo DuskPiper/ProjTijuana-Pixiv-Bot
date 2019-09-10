@@ -34,9 +34,10 @@ class BotMsg:
               "I am here to help you look for artworks from pixiv.net easily" \
               "To see all supported commands, use /help "
     HELP = "Below are commands I can understand\n" \
-           "/help        show this message again\n" \
-           "/pid [PID]   send you artworks of given PixivID\n" \
-           "/uid [UID]   send you recent PixivIDs of given pixiv account\n\n\n" \
+           "/help           show this message again\n" \
+           "/pid [PID]      send you artworks of given PixivID\n" \
+           "/uid [UID]      send you recent PixivIDs of given pixiv account\n" \
+           "/downpid [PID]  send you original-sized artworks for download\n\n" \
            "More functions to be delivered soon, enjoy!"
 
     CMD_PID_WARN_EMPTY_PID = "Please send me a PixivID number after \"/pid\" "
@@ -47,3 +48,5 @@ class BotMsg:
     CMD_UID_WARN_MULTI_UID = "Multiple UIDs currently unsupported"
     CMD_UID_ERR_UID_NOT_FOUND = "Pixiv user-ID query failure, please check UID validity"
     CMD_UID_INFO_LIMIT_REACHED = "Only showing recent {} PixivID results".format(UID_MODE_LIMIT)
+
+    CMD_DOWNPID_ERR_FAIL_TO_SEND = "One image not sent, it may be too large"
