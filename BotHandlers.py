@@ -161,7 +161,7 @@ class BotHandlers:
                     )
                 except TelegramError:
                     context.bot.send_message(
-                        text= BotMsg.CMD_DOWNPID_ERR_FAIL_TO_SEND,
+                        text=BotMsg.CMD_DOWNPID_ERR_FAIL_TO_SEND,
                         chat_id=update.message.chat_id
                     )
             logging.info("/pid {} success".format(pid))
@@ -192,7 +192,7 @@ class BotHandlers:
             logging.debug("/pid command rejected: " + pid)
             return
         pid = "".join(findall(r"\d", pid))
-        photo_caption = PIXIV_SHORT_LINK_TEMPLATE.format(pid)
+        # photo_caption = PIXIV_SHORT_LINK_TEMPLATE.format(pid)
 
         # Try find image locally, if N/A then call API to download
         artworks_dir = db.search(pid)
@@ -221,3 +221,23 @@ class BotHandlers:
             )
             logging.info("/pid {} success".format(pid))
             return
+
+    @staticmethod
+    def search(query, page=1, per_page=30, mode="text",
+               period="all", order="desc", sort="date",
+               types=("illustration", "manga", "ugoira"),
+               image_sizes=("px_128x128", "large"),
+               include_stats=True, include_sanity_level=True):
+        params = {
+            "q": query,
+            "page": page,
+            "per_page": per_page,
+            "period": period,
+            "order": order,
+            "sort": sort,
+            "mode": mode,
+            "types": ",".join(types),
+            "include_stats": include_stats,
+            "include_sanity_level": include_sanity_level,
+            "image_sizes": ",".join(image_sizes),
+        }
