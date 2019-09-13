@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 # @Author: DuskPiper
-# @Version: 0.3.2
+# @Version: 0.4.0
 
 from Constants import *
 from BotHandlers import BotHandlers
@@ -40,7 +40,7 @@ try:
 except IOError:
     logging.error("Failed to read cookies")
     logging.critical("Cookies file should be in project-dir and named \"{}\"".format(COOKIES_FILE_NAME))
-    exit(ExitCode.TOKEN_FILE_NOT_FOUND)
+    exit(ExitCode.COOKIES_FILE_NOT_FOUND)
 
 # Initialize bot
 updater = Updater(token=token, use_context=True)
@@ -53,6 +53,7 @@ dispatcher.add_handler(CommandHandler("help", BotHandlers.help))
 dispatcher.add_handler(CommandHandler("pid", BotHandlers.pid))
 dispatcher.add_handler(CommandHandler("uid", BotHandlers.uid))
 dispatcher.add_handler(CommandHandler("downpid", BotHandlers.downpid))
+dispatcher.add_handler(CommandHandler("search", BotHandlers.search))
 
 # Run bot
 updater.start_polling()

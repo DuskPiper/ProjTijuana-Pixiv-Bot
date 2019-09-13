@@ -6,12 +6,14 @@ from PixivHelper import PixivHelper
 from DBHelper import db
 from Constants import *
 from PixivArtworks import PixivArtworks
+from PiperPixivBot import cookies
 
 import logging
 from re import findall
 from telegram.ext import CallbackContext
 from telegram.update import Update
 from telegram import TelegramError, InputMediaPhoto
+from PixivSearchCrawler import PixivSearchCrawler
 
 
 class BotHandlers:
@@ -82,30 +84,9 @@ class BotHandlers:
             )
             all_pid = all_pid[:UID_MODE_LIMIT]
 
-        # Query and send each PID
+        # Send each PID
         for pid in all_pid:
-            artworks_dir = db.search(pid)
-            photo_caption = PIXIV_SHORT_LINK_TEMPLATE.format(pid)
-            if not artworks_dir:  # not found locally, query API
-                artworks: PixivArtworks = PixivHelper.download_artworks_by_pid(pid)
-                if not artworks or not artworks.artworks:  # web query failure
-                    context.bot.send_message(
-                        text=BotMsg.CMD_PID_ERR_PID_NOT_FOUND,
-                        chat_id=update.message.chat_id,
-                        reply_to_message_id=update.message.message_id
-                    )
-                    logging.debug("/pid command rejected: PID query failure")
-                    continue
-                else:  # web query succeed, write to local db
-                    db.add(artworks)
-            artworks_dir = db.search(pid)
-            if artworks_dir:  # found file locally
-                for image_dir in artworks_dir:
-                    context.bot.send_photo(
-                        photo=open(image_dir, "rb"),
-                        caption=photo_caption,
-                        chat_id=update.message.chat_id
-                    )
+            BotHandlers._send_compressed_image_of_pid(update, context, pid)
         logging.info("/uid {} success".format(uid))
 
     @staticmethod
@@ -194,6 +175,58 @@ class BotHandlers:
         pid = "".join(findall(r"\d", pid))
         # photo_caption = PIXIV_SHORT_LINK_TEMPLATE.format(pid)
 
+        # Send artworks of pid
+        BotHandlers._send_compressed_image_of_pid(update, context, pid)
+        logging.info("/pid {} success".format(pid))
+
+    @staticmethod
+    def search(update: Update, context: CallbackContext):
+        """
+        Search with given keywords, with help of crawler
+        """
+
+        # Validate args
+        if not context.args:
+            context.bot.send_message(
+                text=BotMsg.CMD_SEARCH_EMPTY_ARGS,
+                chat_id=update.message.chat_id,
+                reply_to_message_id=update.message.message_id
+            )
+            logging.debug("/search command rejected: lacking args")
+            return
+        keyword = " ".join(context.args)
+        if not keyword:
+            context.bot.send_message(
+                text=BotMsg.CMD_SEARCH_EMPTY_ARGS,
+                chat_id=update.message.chat_id,
+                reply_to_message_id=update.message.message_id
+            )
+            logging.debug("/search command rejected: lacking args")
+            return
+        keyword = keyword[:SEARCH_MODE_KEYWORD_LENGTH_LIMIT]
+
+        # Call crawler
+        pids = PixivSearchCrawler(keyword, cookies).crawl()
+
+        # Send results
+        if not pids:
+            context.bot.send_message(
+                text=BotMsg.CMD_SEARCH_EMPTY_RESULTS,
+                chat_id=update.message.chat_id,
+                reply_to_message_id=update.message.message_id
+            )
+            return
+        for pid in pids:
+            BotHandlers._send_compressed_image_of_pid(update, context, pid)
+        logging.info("/search {} success".format(keyword))
+
+    @staticmethod
+    def _send_compressed_image_of_pid(update: Update, context: CallbackContext, pid):
+        """
+        Send image of given PID to chat
+        :param pid: PixivID
+        """
+
         # Try find image locally, if N/A then call API to download
         artworks_dir = db.search(pid)
         if not artworks_dir:  # not found locally, query API
@@ -204,7 +237,7 @@ class BotHandlers:
                     chat_id=update.message.chat_id,
                     reply_to_message_id=update.message.message_id
                 )
-                logging.debug("/pid command rejected: PID query failure")
+                logging.debug("send pid rejected: PID query failure")
                 return
             else:  # web query succeed, write to local db
                 db.add(artworks)
@@ -219,25 +252,4 @@ class BotHandlers:
                 chat_id=update.message.chat_id,
                 media=image_group
             )
-            logging.info("/pid {} success".format(pid))
-            return
-
-    @staticmethod
-    def search(query, page=1, per_page=30, mode="text",
-               period="all", order="desc", sort="date",
-               types=("illustration", "manga", "ugoira"),
-               image_sizes=("px_128x128", "large"),
-               include_stats=True, include_sanity_level=True):
-        params = {
-            "q": query,
-            "page": page,
-            "per_page": per_page,
-            "period": period,
-            "order": order,
-            "sort": sort,
-            "mode": mode,
-            "types": ",".join(types),
-            "include_stats": include_stats,
-            "include_sanity_level": include_sanity_level,
-            "image_sizes": ",".join(image_sizes),
-        }
+            logging.info("send pid {} success".format(pid))

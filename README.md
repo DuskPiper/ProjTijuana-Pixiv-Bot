@@ -37,6 +37,14 @@ Currently available commands are listed below.
 
 ## Versions
 
+#### 0.4.0
+
+**beta4.0**
+
+- New feature: `/search`
+- Re-structure code to improve flexibility
+- Cookies needed for searcher crawler
+
 ####0.3.2
 
 **beta3.2**
@@ -73,7 +81,7 @@ Currently available commands are listed below.
 
 #### Front End
 
-- `/search` 
+- `/remilia`
 
 ####Back End
 

@@ -27,10 +27,13 @@ COOKIES_FILE_NAME = "cookies"
 UID_MODE_LIMIT = 5  # maximum PIDs queried
 SEARCH_MODE_LIMIT = 5  # maximum search results
 SEARCH_MODE_PAGE_LIMIT = 24  # maximum crawler pages
+SEARCH_MODE_KEYWORD_LENGTH_LIMIT = 40  # keyword string longer than this will be cropped
+PIXIV_SEARCH_CRAWLER_THREADS_LIMIT = 4  # maximum threads used to crawl search page
 
 
 class ExitCode(Enum):
     TOKEN_FILE_NOT_FOUND = 0x1100
+    COOKIES_FILE_NOT_FOUND = 0x1101
 
 
 class BotMsg:
@@ -41,6 +44,7 @@ class BotMsg:
            "/help           show this message again\n" \
            "/pid [PID]      send you artworks of given PixivID\n" \
            "/uid [UID]      send you recent PixivIDs of given pixiv account\n" \
+           "/search [words] search for key words\n" \
            "/downpid [PID]  send you original-sized artworks for download\n\n" \
            "More functions to be delivered soon, enjoy!"
 
@@ -54,3 +58,6 @@ class BotMsg:
     CMD_UID_INFO_LIMIT_REACHED = "Only showing recent {} PixivID results".format(UID_MODE_LIMIT)
 
     CMD_DOWNPID_ERR_FAIL_TO_SEND = "One image not sent, it may be too large"
+
+    CMD_SEARCH_EMPTY_ARGS = "Please also send me keywords after \"/search\""
+    CMD_SEARCH_EMPTY_RESULTS = "No results... Try shorten your keywords?"

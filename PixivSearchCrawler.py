@@ -29,20 +29,17 @@ class PixivSearchCrawler:
         injected_data = raw_injected_data[0].replace("&quot;", "").split(",")
         pid, bookmarks = None, None
         for phrase in injected_data:
-            try:
-                if "illustId" in phrase:
-                    pid = phrase.split(":")[1]
-                elif "bookmarkCount" in phrase:
-                    if not pid:
-                        continue  # Honestly, this shouldn't happen
-                    bookmarks = int(phrase.split(":")[1])
-                    with self.lock:
-                        self.pids[pid] = bookmarks
-            except:
-                pass
+            if "illustId" in phrase:
+                pid = phrase.split(":")[1]
+            elif "bookmarkCount" in phrase:
+                if not pid:
+                    continue  # Honestly, this shouldn't happen
+                bookmarks = int(phrase.split(":")[1])
+                with self.lock:
+                    self.pids[pid] = bookmarks
 
     def crawl(self):
         urls = [PIXIV_SEARCH_PAGE_TEMPLATE.format(self.keyword, page + 1) for page in range(SEARCH_MODE_PAGE_LIMIT)]
-        with ThreadPoolExecutor(4) as executor:
+        with ThreadPoolExecutor(PIXIV_SEARCH_CRAWLER_THREADS_LIMIT) as executor:
             executor.map(self._crawl_single_page, urls)
         return sorted(self.pids, key=lambda entry: entry[1])[:self.num_results]
