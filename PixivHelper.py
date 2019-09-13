@@ -4,10 +4,10 @@
 
 from Constants import *
 from PixivArtworks import PixivArtworks
+from PixivSearchCrawler import PixivSearchCrawler
 
 from urllib import request
 from re import findall
-import requests
 
 
 def http_obj(url, headers):
@@ -67,22 +67,8 @@ class PixivHelper:
         :param num_results: number of results
         :return: [PixivIDs]
         """
-        urls = [PIXIV_SEARCH_PAGE_TEMPLATE.format(keyword, page + 1) for page in range(SEARCH_MODE_PAGE_LIMIT)]
-        pids = {}  # {PixivID : #bookmark}
-        for url in urls:
-            req = requests.get(url, headers=DEFAULT_HEADER, cookies=cookies).text
-            raw_injected_data = findall(r"\"\[{(.+?)}\]\"", req)
-            injected_data = raw_injected_data[0].replace("&quot;", "").split(",")
-            pid, bookmarks = None, None
-            for phrase in injected_data:
-                if "illustId" in phrase:
-                    pid = phrase.split(":")[1]
-                elif "bookmarkCount" in phrase:
-                    if not pid:
-                        continue  # Honestly, this shouldn't happen
-                    bookmarks = int(phrase.split(":")[1])
-                    pids[pid] = bookmarks
-        return sorted(pids, key=lambda entry: entry[1])[:num_results]
+        crawler = PixivSearchCrawler(test_search_word, cook)
+        return crawler.crawl()
 
 
 if __name__ == "__main__":
@@ -96,4 +82,3 @@ if __name__ == "__main__":
         for row in f.read().split(";"):
             k, v = row.strip().split("=", 1)
             cook[k] = v
-    print(PixivHelper.search(test_search_word, cook))

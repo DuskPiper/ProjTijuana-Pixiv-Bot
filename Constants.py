@@ -26,7 +26,7 @@ COOKIES_FILE_NAME = "cookies"
 
 UID_MODE_LIMIT = 5  # maximum PIDs queried
 SEARCH_MODE_LIMIT = 5  # maximum search results
-SEARCH_MODE_PAGE_LIMIT = 10  # maximum crawler pages
+SEARCH_MODE_PAGE_LIMIT = 24  # maximum crawler pages
 
 
 class ExitCode(Enum):

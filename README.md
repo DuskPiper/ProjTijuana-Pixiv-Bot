@@ -27,7 +27,7 @@ Currently available commands are listed below.
 2. To run
   
    - Leave your bot token in a file named `token` in project directory
-   
+   - Leave your pixiv.net cookie in a file named `cookie` in project directory
    - Open Terminal at folder
    - `$ python PiperPixivBot.py`
    
