@@ -16,15 +16,17 @@ DEFAULT_HEADER = {
 PID_PAGE_TEMPLATE = "https://www.pixiv.net/member_illust.php?mode=medium&illust_id={}"
 PID_AJAX_TEMPLATE = "https://www.pixiv.net/touch/ajax/illust/details?illust_id={}"
 UID_AJAX_TEMPLATE = "https://www.pixiv.net/ajax/user/{}/profile/all"
-SEARCH_API_TEMPLATE = "https://public-api.secure.pixiv.net/v1/search/works.json"
 PIXIV_SHORT_LINK_TEMPLATE = "pixiv.net/i/{}"
+PIXIV_SEARCH_PAGE_TEMPLATE = "https://www.pixiv.net/search.php?word={}&order=date_d&p={}"
 
 ROOT_DIR = dirname(abspath(__file__))
 DB_FOLDER_NAME = "db"
 TOKEN_FILE_NAME = "token"
+COOKIES_FILE_NAME = "cookies"
 
 UID_MODE_LIMIT = 5  # maximum PIDs queried
 SEARCH_MODE_LIMIT = 5  # maximum search results
+SEARCH_MODE_PAGE_LIMIT = 10  # maximum crawler pages
 
 
 class ExitCode(Enum):

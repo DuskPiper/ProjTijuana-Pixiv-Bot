@@ -9,6 +9,7 @@ db/
 # Private File
 token
 log
+cookies
 
 # C extensions
 *.so

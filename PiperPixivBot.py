@@ -17,7 +17,7 @@ logging.basicConfig(
     level=logging.DEBUG
 )
 
-# Load token
+# Load telegram-bot token
 token = None
 try:
     token_loader = open(join(ROOT_DIR, TOKEN_FILE_NAME), "r")
@@ -26,6 +26,20 @@ try:
 except IOError:
     logging.error("Failed to read token")
     logging.critical("Token file should be in project-dir and named \"{}\"".format(TOKEN_FILE_NAME))
+    exit(ExitCode.TOKEN_FILE_NOT_FOUND)
+
+# Load pixiv.net cookies (for searching)
+cookies = {}
+try:
+    cookies_loader = open(join(ROOT_DIR, COOKIES_FILE_NAME), "r")
+    raw_cookies = cookies_loader.read()
+    cookies_loader.close()
+    for row in raw_cookies.split(";"):
+        cookies_key, cookies_val = row.strip().split("=", 1)
+        cookies[cookies_key] = cookies_val
+except IOError:
+    logging.error("Failed to read cookies")
+    logging.critical("Cookies file should be in project-dir and named \"{}\"".format(COOKIES_FILE_NAME))
     exit(ExitCode.TOKEN_FILE_NOT_FOUND)
 
 # Initialize bot
