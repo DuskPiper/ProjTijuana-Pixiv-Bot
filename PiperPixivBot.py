@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 # @Author: DuskPiper
-# @Version: 0.4.0
+# @Version: 0.4.1
 
 from Constants import *
 from BotHandlers import BotHandlers
@@ -41,6 +41,7 @@ except IOError:
     logging.error("Failed to read cookies")
     logging.critical("Cookies file should be in project-dir and named \"{}\"".format(COOKIES_FILE_NAME))
     exit(ExitCode.COOKIES_FILE_NOT_FOUND)
+COOKIES = cookies
 
 # Initialize bot
 updater = Updater(token=token, use_context=True)

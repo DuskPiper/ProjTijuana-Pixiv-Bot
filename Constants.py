@@ -12,6 +12,7 @@ DEFAULT_HEADER = {
     "Accept-Encoding": "",
     "Connection": "keep-alive",
 }
+COOKIES = None
 
 PID_PAGE_TEMPLATE = "https://www.pixiv.net/member_illust.php?mode=medium&illust_id={}"
 PID_AJAX_TEMPLATE = "https://www.pixiv.net/touch/ajax/illust/details?illust_id={}"
@@ -41,11 +42,11 @@ class BotMsg:
               "I am here to help you look for artworks from pixiv.net easily" \
               "To see all supported commands, use /help "
     HELP = "Below are commands I can understand\n" \
-           "/help           show this message again\n" \
-           "/pid [PID]      send you artworks of given PixivID\n" \
-           "/uid [UID]      send you recent PixivIDs of given pixiv account\n" \
-           "/search [words] search for key words\n" \
-           "/downpid [PID]  send you original-sized artworks for download\n\n" \
+           "`/help           `show this message again\n" \
+           "`/pid [PID]      `artworks of given PixivID\n" \
+           "`/uid [UID]      `recent artworks of given account\n" \
+           "`/search [words] `search for key words\n" \
+           "`/downpid [PID]  `original-sized artworks for download\n\n" \
            "More functions to be delivered soon, enjoy!"
 
     CMD_PID_WARN_EMPTY_PID = "Please send me a PixivID number after \"/pid\" "

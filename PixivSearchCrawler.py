@@ -16,6 +16,8 @@ class PixivSearchCrawler:
     """
 
     def __init__(self, keyword, cookies, num_results=SEARCH_MODE_LIMIT):
+        if not cookies:
+            raise ValueError
         self.keyword = keyword
         self.cookies = cookies
         self.num_results = num_results

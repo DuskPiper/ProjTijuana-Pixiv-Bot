@@ -6,7 +6,6 @@ from PixivHelper import PixivHelper
 from DBHelper import db
 from Constants import *
 from PixivArtworks import PixivArtworks
-from PiperPixivBot import cookies
 
 import logging
 from re import findall
@@ -206,7 +205,14 @@ class BotHandlers:
         keyword = keyword[:SEARCH_MODE_KEYWORD_LENGTH_LIMIT]
 
         # Call crawler
-        pids = PixivSearchCrawler(keyword, cookies).crawl()
+        try:
+            crawler = PixivSearchCrawler(keyword, COOKIES)
+            pids = crawler.crawl()
+            del crawler
+        except ValueError:
+            logging.error("No valid cookies detected!")
+            logging.error("/search rejected, cookies are required")
+            return
 
         # Send results
         if not pids:
@@ -245,11 +251,23 @@ class BotHandlers:
         # Get image locally
         artworks_dir = db.search(pid)
         if artworks_dir:  # found file locally
+            short_link = PIXIV_SHORT_LINK_TEMPLATE.format(pid)
             image_group = []
             for image_dir in artworks_dir:
                 image_group.append(InputMediaPhoto(open(image_dir, "rb")))
-            context.bot.send_media_group(
-                chat_id=update.message.chat_id,
-                media=image_group
-            )
+            if len(image_group) > 1:
+                context.bot.send_media_group(
+                    chat_id=update.message.chat_id,
+                    media=image_group
+                )
+                context.bot.send_message(
+                    chat_id=update.message.chat_id,
+                    text="👆 " + short_link
+                )
+            else:
+                context.bot.send_photo(
+                    chat_id=update.message.chat_id,
+                    photo=image_group[0],
+                    caption=short_link
+                )
             logging.info("send pid {} success".format(pid))
