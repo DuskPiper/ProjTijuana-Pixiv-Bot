@@ -15,18 +15,18 @@ class PixivSearchCrawler:
     Multi-threaded search page crawler
     """
 
-    def __init__(self, keyword, cookies, num_results=SEARCH_MODE_LIMIT):
-        if not cookies:
-            raise ValueError
+    def __init__(self, keyword, num_results=SEARCH_MODE_LIMIT, pages=SEARCH_MODE_PAGE_LIMIT):
+        if not COOKIES:
+            raise EnvironmentError
         self.keyword = keyword
-        self.cookies = cookies
         self.num_results = num_results
         self.header = DEFAULT_HEADER
         self.pids = {}  # {PixivID : #Bookmarks}
         self.lock = threading.Lock()
+        self.pages = pages
 
     def _crawl_single_page(self, url):
-        req = requests.get(url, headers=DEFAULT_HEADER, cookies=self.cookies).text
+        req = requests.get(url, headers=DEFAULT_HEADER, cookies=COOKIES).text
         raw_injected_data = findall(r"\"\[{(.+?)}\]\"", req)
         injected_data = raw_injected_data[0].replace("&quot;", "").split(",")
         pid, bookmarks = None, None
@@ -40,8 +40,9 @@ class PixivSearchCrawler:
                 with self.lock:
                     self.pids[pid] = bookmarks
 
-    def crawl(self):
-        urls = [PIXIV_SEARCH_PAGE_TEMPLATE.format(self.keyword, page + 1) for page in range(SEARCH_MODE_PAGE_LIMIT)]
+    def crawl(self, safemode=False):
+        url_template = PIXIV_SEARCH_PAGE_SAFE_TEMPLATE if safemode else PIXIV_SEARCH_PAGE_TEMPLATE
+        urls = [url_template.format(self.keyword, page + 1) for page in range(self.pages)]
         with ThreadPoolExecutor(PIXIV_SEARCH_CRAWLER_THREADS_LIMIT) as executor:
             executor.map(self._crawl_single_page, urls)
         return sorted(self.pids, key=lambda entry: entry[1])[:self.num_results]

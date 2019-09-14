@@ -9,6 +9,8 @@ from os.path import *
 from os import makedirs, umask, listdir, remove, removedirs
 import logging
 
+logger = logging.getLogger(__name__)
+
 
 class DBHelper:
 
@@ -52,12 +54,12 @@ class DBHelper:
                 image_writer.write(image)
                 image_writer.close()
             except IOError:  # ToDo: BUG, may save some of artworks and fail to save other
-                logging.error("Failure saving image: " + image_name)
+                LOGGER.error("Failure saving image: " + image_name)
                 return False
             else:
                 self.size += 1
                 self.size_in_bytes += getsize(file_path)
-                logging.info("Saved image: " + image_name)
+                LOGGER.info("Saved image: " + image_name)
         self.pid_to_uid[artworks.pid] = artworks.uid
         return True
 
@@ -79,11 +81,11 @@ class DBHelper:
                 try:
                     remove(file_path)
                 except IOError:
-                    logging.error("Failed to remove image: " + file_name)
+                    LOGGER.error("Failed to remove image: " + file_name)
                 else:
                     self.size_in_bytes -= file_size
                     self.size -= 1
-                    logging.info("Deleted file: " + file_name)
+                    LOGGER.info("Deleted file: " + file_name)
         self.pid_to_uid.pop(pid)
         self.history.remove(pid)
         if not listdir(uid_path):  # UID folder empty
@@ -92,9 +94,9 @@ class DBHelper:
                 removedirs(uid_path)
                 umask(old_mask)  # return permission
             except IOError:
-                logging.error("Failed to delete empty UID folder " + uid)
+                LOGGER.error("Failed to delete empty UID folder " + uid)
             else:
-                logging.info("Deleted empty UID folder" + uid)
+                LOGGER.info("Deleted empty UID folder" + uid)
 
     def search(self, pid):
         """
@@ -128,7 +130,7 @@ class DBHelper:
                 self.size_in_bytes += getsize(join(uid_dir, image_name))
                 self.pid_to_uid[pid] = uid
         self._validate_history()
-        logging.info("Updated DB")
+        LOGGER.info("Updated DB")
         self.print_db_status()
 
     def _update_history(self, pid):
@@ -152,8 +154,8 @@ class DBHelper:
                 self.history.remove(pid)
 
 
-db = DBHelper()  # Singleton
-logging.info("Database initialized")
+db = DBHelper()  # Singleton, initialized ASAP
+LOGGER.info("Database initialized")
 
 if __name__ == "__main__":
     import PixivHelper

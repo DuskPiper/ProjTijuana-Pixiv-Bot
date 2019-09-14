@@ -58,18 +58,6 @@ class PixivHelper:
                 artworks.add_artwork(image_url.rsplit('/', 1)[-1], image.read())
         return artworks
 
-    @staticmethod
-    def search(keyword, cookies, num_results=SEARCH_MODE_LIMIT):
-        """
-        Search for key-word and return highest starred results
-        :param keyword: searched key-word
-        :param cookies: cookies for log-in
-        :param num_results: number of results
-        :return: [PixivIDs]
-        """
-        crawler = PixivSearchCrawler(test_search_word, cook)
-        return crawler.crawl()
-
 
 if __name__ == "__main__":
     test_uid = "11246082"

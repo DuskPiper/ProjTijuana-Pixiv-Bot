@@ -2,8 +2,16 @@
 # -*- encoding: utf-8 -*-
 # @Author: DuskPiper
 
-from os.path import dirname, abspath
+from os.path import dirname, abspath, join
 from enum import Enum
+import logging
+
+# Config logging
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+LOGGER = logging.getLogger(__name__)
 
 DEFAULT_HEADER = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:52.0) Gecko/20100101 Firefox/52.0",
@@ -12,18 +20,20 @@ DEFAULT_HEADER = {
     "Accept-Encoding": "",
     "Connection": "keep-alive",
 }
-COOKIES = None
 
 PID_PAGE_TEMPLATE = "https://www.pixiv.net/member_illust.php?mode=medium&illust_id={}"
 PID_AJAX_TEMPLATE = "https://www.pixiv.net/touch/ajax/illust/details?illust_id={}"
 UID_AJAX_TEMPLATE = "https://www.pixiv.net/ajax/user/{}/profile/all"
 PIXIV_SHORT_LINK_TEMPLATE = "pixiv.net/i/{}"
 PIXIV_SEARCH_PAGE_TEMPLATE = "https://www.pixiv.net/search.php?word={}&order=date_d&p={}"
+PIXIV_SEARCH_PAGE_SAFE_TEMPLATE = "https://www.pixiv.net/search.php?word={}&order=date_d&p={}&mode=safe"
+
 
 ROOT_DIR = dirname(abspath(__file__))
 DB_FOLDER_NAME = "db"
 TOKEN_FILE_NAME = "token"
 COOKIES_FILE_NAME = "cookies"
+REMILIA_FILE_NAME = "remilia"
 
 UID_MODE_LIMIT = 5  # maximum PIDs queried
 SEARCH_MODE_LIMIT = 5  # maximum search results
@@ -46,6 +56,7 @@ class BotMsg:
            "`/pid [PID]      `artworks of given PixivID\n" \
            "`/uid [UID]      `recent artworks of given account\n" \
            "`/search [words] `search for key words\n" \
+           "`/remilia        `a random レミリア artwork\n" \
            "`/downpid [PID]  `original-sized artworks for download\n\n" \
            "More functions to be delivered soon, enjoy!"
 
@@ -62,3 +73,21 @@ class BotMsg:
 
     CMD_SEARCH_EMPTY_ARGS = "Please also send me keywords after \"/search\""
     CMD_SEARCH_EMPTY_RESULTS = "No results... Try shorten your keywords?"
+
+    CMD_REMILIA_EMPTY_RESULTS = "Something is wrong here... Can't find any レミ"
+
+
+# Load pixiv.net cookies (for searching)
+COOKIES = {}
+try:
+    cookies_loader = open(join(ROOT_DIR, COOKIES_FILE_NAME), "r")
+    raw_cookies = cookies_loader.read()
+    cookies_loader.close()
+    for row in raw_cookies.split(";"):
+        cookies_key, cookies_val = row.strip().split("=", 1)
+        COOKIES[cookies_key] = cookies_val
+    LOGGER.info("Loaded cookies")
+except IOError:
+    LOGGER.critical("Failed to read cookies")
+    LOGGER.error("Cookies file should be in project-dir and named \"{}\"".format(COOKIES_FILE_NAME))
+    exit(ExitCode.COOKIES_FILE_NOT_FOUND)

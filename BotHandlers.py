@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-# -*- encoding: utf-8 -*-
-# @Author: DuskPiper
+# # -*- encoding: utf-8 -*-
+# # @Author: DuskPiper
 
 from PixivHelper import PixivHelper
 from DBHelper import db
 from Constants import *
 from PixivArtworks import PixivArtworks
+from Remilia import Remilia
 
 import logging
 from re import findall
@@ -14,12 +15,14 @@ from telegram.update import Update
 from telegram import TelegramError, InputMediaPhoto
 from PixivSearchCrawler import PixivSearchCrawler
 
+logger = logging.getLogger(__name__)
+
 
 class BotHandlers:
 
     @staticmethod
     def error_handler(update: Update, context: CallbackContext):
-        logging.error("An error occurred! Update {} caused {} error.".format(
+        LOGGER.error("An error occurred! Update {} caused {} error.".format(
             update.update_id if update else "[Null Updater]",
             context.error
         ))
@@ -31,7 +34,7 @@ class BotHandlers:
             chat_id=update.message.chat_id,
             reply_to_message_id=update.message.message_id
         )
-        logging.info("New user: " + str(update.message.chat_id))
+        LOGGER.info("New user: " + str(update.message.chat_id))
 
     @staticmethod
     def help(update: Update, context: CallbackContext):
@@ -54,7 +57,7 @@ class BotHandlers:
                 chat_id=update.message.chat_id,
                 reply_to_message_id=update.message.message_id
             )
-            logging.debug("/uid command rejected: lacking args")
+            LOGGER.debug("/uid command rejected: lacking args")
             return
         uid = context.args[0]
         if len(context.args) > 1 or "," in uid:
@@ -63,7 +66,7 @@ class BotHandlers:
                 chat_id=update.message.chat_id,
                 reply_to_message_id=update.message.message_id
             )
-            logging.debug("/uid command rejected: " + uid)
+            LOGGER.debug("/uid command rejected: " + uid)
             return
         uid = "".join(findall(r"\d", uid))
 
@@ -86,7 +89,7 @@ class BotHandlers:
         # Send each PID
         for pid in all_pid:
             BotHandlers._send_compressed_image_of_pid(update, context, pid)
-        logging.info("/uid {} success".format(uid))
+        LOGGER.info("/uid {} success".format(uid))
 
     @staticmethod
     def downpid(update: Update, context: CallbackContext):
@@ -101,7 +104,7 @@ class BotHandlers:
                 chat_id=update.message.chat_id,
                 reply_to_message_id=update.message.message_id
             )
-            logging.debug("/pid command rejected: lacking args")
+            LOGGER.debug("/pid command rejected: lacking args")
             return
         pid = context.args[0]
         if len(context.args) > 1 or "," in pid:
@@ -110,7 +113,7 @@ class BotHandlers:
                 chat_id=update.message.chat_id,
                 reply_to_message_id=update.message.message_id
             )
-            logging.debug("/pid command rejected: " + pid)
+            LOGGER.debug("/pid command rejected: " + pid)
             return
         pid = "".join(findall(r"\d", pid))
 
@@ -125,7 +128,7 @@ class BotHandlers:
                     chat_id=update.message.chat_id,
                     reply_to_message_id=update.message.message_id
                 )
-                logging.debug("/pid command rejected: PID query failure")
+                LOGGER.debug("/pid command rejected: PID query failure")
                 return
             else:  # web query succeed, write to local db
                 db.add(artworks)
@@ -144,7 +147,7 @@ class BotHandlers:
                         text=BotMsg.CMD_DOWNPID_ERR_FAIL_TO_SEND,
                         chat_id=update.message.chat_id
                     )
-            logging.info("/pid {} success".format(pid))
+            LOGGER.info("/pid {} success".format(pid))
             return
 
     @staticmethod
@@ -160,7 +163,7 @@ class BotHandlers:
                 chat_id=update.message.chat_id,
                 reply_to_message_id=update.message.message_id
             )
-            logging.debug("/pid command rejected: lacking args")
+            LOGGER.debug("/pid command rejected: lacking args")
             return
         pid = context.args[0]
         if len(context.args) > 1 or "," in pid:
@@ -169,14 +172,14 @@ class BotHandlers:
                 chat_id=update.message.chat_id,
                 reply_to_message_id=update.message.message_id
             )
-            logging.debug("/pid command rejected: " + pid)
+            LOGGER.debug("/pid command rejected: " + pid)
             return
         pid = "".join(findall(r"\d", pid))
         # photo_caption = PIXIV_SHORT_LINK_TEMPLATE.format(pid)
 
         # Send artworks of pid
         BotHandlers._send_compressed_image_of_pid(update, context, pid)
-        logging.info("/pid {} success".format(pid))
+        LOGGER.info("/pid {} success".format(pid))
 
     @staticmethod
     def search(update: Update, context: CallbackContext):
@@ -191,7 +194,7 @@ class BotHandlers:
                 chat_id=update.message.chat_id,
                 reply_to_message_id=update.message.message_id
             )
-            logging.debug("/search command rejected: lacking args")
+            LOGGER.debug("/search command rejected: lacking args")
             return
         keyword = " ".join(context.args)
         if not keyword:
@@ -200,18 +203,18 @@ class BotHandlers:
                 chat_id=update.message.chat_id,
                 reply_to_message_id=update.message.message_id
             )
-            logging.debug("/search command rejected: lacking args")
+            LOGGER.debug("/search command rejected: lacking args")
             return
         keyword = keyword[:SEARCH_MODE_KEYWORD_LENGTH_LIMIT]
 
         # Call crawler
         try:
-            crawler = PixivSearchCrawler(keyword, COOKIES)
+            crawler = PixivSearchCrawler(keyword)
             pids = crawler.crawl()
             del crawler
         except ValueError:
-            logging.error("No valid cookies detected!")
-            logging.error("/search rejected, cookies are required")
+            LOGGER.error("No valid cookies detected!")
+            LOGGER.error("/search rejected, cookies are required")
             return
 
         # Send results
@@ -224,13 +227,29 @@ class BotHandlers:
             return
         for pid in pids:
             BotHandlers._send_compressed_image_of_pid(update, context, pid)
-        logging.info("/search {} success".format(keyword))
+        LOGGER.info("/search {} success".format(keyword))
+
+    @staticmethod
+    def remilia(update: Update, context: CallbackContext):
+        """
+        Crawl レミリア・スカーレット image and send a random one
+        """
+        pid = Remilia().get()
+        if not pid:
+            context.bot.send_message(
+                text=BotMsg.CMD_REMILIA_EMPTY_RESULTS,
+                chat_id=update.message.chat_id
+            )
+            LOGGER.error("/remilia rejected, can't find any pid of her")
+            return
+        BotHandlers._send_compressed_image_of_pid(update, context, pid)
+        LOGGER.info("/remilia succeed")
 
     @staticmethod
     def _send_compressed_image_of_pid(update: Update, context: CallbackContext, pid):
         """
         Send image of given PID to chat
-        :param pid: PixivID
+        :param pid: PixivID in string
         """
 
         # Try find image locally, if N/A then call API to download
@@ -243,7 +262,7 @@ class BotHandlers:
                     chat_id=update.message.chat_id,
                     reply_to_message_id=update.message.message_id
                 )
-                logging.debug("send pid rejected: PID query failure")
+                LOGGER.debug("send pid rejected: PID query failure")
                 return
             else:  # web query succeed, write to local db
                 db.add(artworks)
@@ -262,7 +281,8 @@ class BotHandlers:
                 )
                 context.bot.send_message(
                     chat_id=update.message.chat_id,
-                    text="👆 " + short_link
+                    text="👆 " + short_link,
+                    disable_web_page_preview=True
                 )
             else:
                 context.bot.send_photo(
@@ -270,4 +290,4 @@ class BotHandlers:
                     photo=image_group[0],
                     caption=short_link
                 )
-            logging.info("send pid {} success".format(pid))
+            LOGGER.info("Send pid {} success".format(pid))

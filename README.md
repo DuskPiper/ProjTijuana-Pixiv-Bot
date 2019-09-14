@@ -13,6 +13,8 @@ Currently available commands are listed below.
 - `/help`  Show tips
 - `/pid + ____` Download and send you all artworks of a given Pixiv-ID
 - `/uid + ____` Download and send you 5 most recent Pixiv-IDs' artworks
+- `/search + ____` Search for keywords and return 5 highest results
+- `/remilia` Random Remilia-Scarlet artworks 
 
 ## Using Instructions
 
@@ -36,6 +38,13 @@ Currently available commands are listed below.
    - Come back occasionally and try cleaning database folder (`./db/`) by deleting some files on your own preference
 
 ## Versions
+
+#### 0.5.0
+
+**beta5.0**
+
+- New feature: `/remilia`
+- Restructured in-memory data mechanism to incread efficiency 
 
 #### 0.4.0
 
@@ -81,7 +90,7 @@ Currently available commands are listed below.
 
 #### Front End
 
-- `/remilia`
+- bug fix: `/help` msg spaces
 
 ####Back End
 
