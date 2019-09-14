@@ -117,7 +117,6 @@ class BotHandlers:
             return
         pid = "".join(findall(r"\d", pid))
 
-        print(">>> CMD /downpid", pid)
         # Try find image locally, if N/A then call API to download
         artworks_dir = db.search(pid)
         if not artworks_dir:  # not found locally, query API
@@ -271,11 +270,11 @@ class BotHandlers:
         artworks_dir = db.search(pid)
         if artworks_dir:  # found file locally
             short_link = PIXIV_SHORT_LINK_TEMPLATE.format(pid)
-            image_group = []
-            for image_dir in artworks_dir:
-                image_group.append(InputMediaPhoto(open(image_dir, "rb")))
-            if len(image_group) > 1:
-                context.bot.send_media_group(
+            if len(artworks_dir) > 1:
+                image_group = []
+                for image_dir in artworks_dir[:10]:  # Telegram won't allow more than 10 in an album
+                    image_group.append(InputMediaPhoto(open(image_dir, "rb")))
+                context.bot.send_media_group(  # ToDO: send 10+ image by dividing into several albums
                     chat_id=update.message.chat_id,
                     media=image_group
                 )
@@ -287,7 +286,7 @@ class BotHandlers:
             else:
                 context.bot.send_photo(
                     chat_id=update.message.chat_id,
-                    photo=image_group[0],
+                    photo=open(artworks_dir[0], "rb"),
                     caption=short_link
                 )
             LOGGER.info("Send pid {} success".format(pid))

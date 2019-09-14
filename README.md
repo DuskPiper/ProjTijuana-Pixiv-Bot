@@ -39,6 +39,12 @@ Currently available commands are listed below.
 
 ## Versions
 
+#### 0.5.1
+
+**beta5.1**
+
+- Bug fix: send only first 10 artworks if a PID contains 10+
+
 #### 0.5.0
 
 **beta5.0**
