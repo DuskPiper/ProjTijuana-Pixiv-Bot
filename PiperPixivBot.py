@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 # @Author: DuskPiper
-# @Version: 0.5.1
+# @Version: 0.5.2
 
 from Constants import *
 from BotHandlers import BotHandlers
@@ -34,6 +34,7 @@ dispatcher.add_handler(CommandHandler("pid", BotHandlers.pid))
 dispatcher.add_handler(CommandHandler("uid", BotHandlers.uid))
 dispatcher.add_handler(CommandHandler("downpid", BotHandlers.downpid))
 dispatcher.add_handler(CommandHandler("search", BotHandlers.search))
+dispatcher.add_handler(CommandHandler("erosearch", BotHandlers.eroSearch))
 dispatcher.add_handler(CommandHandler("remilia", BotHandlers.remilia))
 
 # Run bot

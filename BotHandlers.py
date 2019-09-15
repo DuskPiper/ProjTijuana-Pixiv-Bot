@@ -183,6 +183,20 @@ class BotHandlers:
     @staticmethod
     def search(update: Update, context: CallbackContext):
         """
+        Safe mode search
+        """
+        BotHandlers._search(update, context)
+
+    @staticmethod
+    def eroSearch(update: Update, context: CallbackContext):
+        """
+        Search, content may contain 18x
+        """
+        BotHandlers._search(update, context, safemode=False)
+
+    @staticmethod
+    def _search(update: Update, context: CallbackContext, safemode=True):
+        """
         Search with given keywords, with help of crawler
         """
 
@@ -209,7 +223,7 @@ class BotHandlers:
         # Call crawler
         try:
             crawler = PixivSearchCrawler(keyword)
-            pids = crawler.crawl()
+            pids = crawler.crawl(safemode=safemode)
             del crawler
         except ValueError:
             LOGGER.error("No valid cookies detected!")

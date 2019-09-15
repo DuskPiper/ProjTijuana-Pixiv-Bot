@@ -40,7 +40,7 @@ class PixivSearchCrawler:
                 with self.lock:
                     self.pids[pid] = bookmarks
 
-    def crawl(self, safemode=False):
+    def crawl(self, safemode=True):
         url_template = PIXIV_SEARCH_PAGE_SAFE_TEMPLATE if safemode else PIXIV_SEARCH_PAGE_TEMPLATE
         urls = [url_template.format(self.keyword, page + 1) for page in range(self.pages)]
         with ThreadPoolExecutor(PIXIV_SEARCH_CRAWLER_THREADS_LIMIT) as executor:

@@ -37,7 +37,7 @@ REMILIA_FILE_NAME = "remilia"
 
 UID_MODE_LIMIT = 5  # maximum PIDs queried
 SEARCH_MODE_LIMIT = 5  # maximum search results
-SEARCH_MODE_PAGE_LIMIT = 24  # maximum crawler pages
+SEARCH_MODE_PAGE_LIMIT = 28  # maximum crawler pages
 SEARCH_MODE_KEYWORD_LENGTH_LIMIT = 40  # keyword string longer than this will be cropped
 PIXIV_SEARCH_CRAWLER_THREADS_LIMIT = 4  # maximum threads used to crawl search page
 
@@ -56,6 +56,7 @@ class BotMsg:
            "`/pid [PID]      `artworks of given PixivID\n" \
            "`/uid [UID]      `recent artworks of given account\n" \
            "`/search [words] `search for key words\n" \
+           "`/erosearch [w.] `careful, results may contain 18x contents\n" \
            "`/remilia        `a random レミリア artwork\n" \
            "`/downpid [PID]  `original-sized artworks for download\n\n" \
            "More functions to be delivered soon, enjoy!"
