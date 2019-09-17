@@ -6,13 +6,32 @@ from os.path import dirname, abspath, join
 from enum import Enum
 import logging
 
-# Config logging
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
-LOGGER = logging.getLogger(__name__)
 
+# Files and dirs
+ROOT_DIR = dirname(abspath(__file__))
+DB_FOLDER_NAME = "db"
+TOKEN_FILE_NAME = "token"
+COOKIES_FILE_NAME = "cookies"
+REMILIA_FILE_NAME = "remilia"
+
+
+# Config logging
+LOGGER = logging.getLogger()
+logging_file_handler = logging.FileHandler(join(ROOT_DIR, "AppLog.log"), mode="a")
+logging_console_handler = logging.StreamHandler()
+logging_formatter = logging.Formatter("%(asctime)s - %(levelname)s : %(message)s")
+
+LOGGER.setLevel(logging.INFO)
+logging_console_handler.setLevel(logging.INFO)
+logging_file_handler.setLevel(logging.DEBUG)
+logging_console_handler.setFormatter(logging_formatter)
+logging_file_handler.setFormatter(logging_formatter)
+
+LOGGER.addHandler(logging_file_handler)
+LOGGER.addHandler(logging_console_handler)
+
+
+# Web query util
 DEFAULT_HEADER = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:52.0) Gecko/20100101 Firefox/52.0",
     "Accept": "*/*",
@@ -29,12 +48,7 @@ PIXIV_SEARCH_PAGE_TEMPLATE = "https://www.pixiv.net/search.php?word={}&order=dat
 PIXIV_SEARCH_PAGE_SAFE_TEMPLATE = "https://www.pixiv.net/search.php?word={}&order=date_d&p={}&mode=safe"
 
 
-ROOT_DIR = dirname(abspath(__file__))
-DB_FOLDER_NAME = "db"
-TOKEN_FILE_NAME = "token"
-COOKIES_FILE_NAME = "cookies"
-REMILIA_FILE_NAME = "remilia"
-
+# Thresholds control
 UID_MODE_LIMIT = 5  # maximum PIDs queried
 SEARCH_MODE_LIMIT = 5  # maximum search results
 SEARCH_MODE_PAGE_LIMIT = 28  # maximum crawler pages
@@ -87,8 +101,8 @@ try:
     for row in raw_cookies.split(";"):
         cookies_key, cookies_val = row.strip().split("=", 1)
         COOKIES[cookies_key] = cookies_val
-    LOGGER.info("Loaded cookies")
+    LOGGER.info("Cookies Loaded")
 except IOError:
-    LOGGER.critical("Failed to read cookies")
+    LOGGER.error("Failed to read cookies")
     LOGGER.error("Cookies file should be in project-dir and named \"{}\"".format(COOKIES_FILE_NAME))
     exit(ExitCode.COOKIES_FILE_NOT_FOUND)

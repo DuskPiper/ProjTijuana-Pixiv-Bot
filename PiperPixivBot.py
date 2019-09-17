@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 # @Author: DuskPiper
-# @Version: 0.5.3
+# @Version: 0.5.4
 
 from Constants import *
 from BotHandlers import BotHandlers
@@ -16,10 +16,10 @@ try:
     token_loader = open(join(ROOT_DIR, TOKEN_FILE_NAME), "r")
     token = token_loader.read()
     token_loader.close()
-    LOGGER.info("Loaded token")
+    LOGGER.info("Token loaded")
 except IOError:
-    LOGGER.error("Failed to read token")
-    LOGGER.critical("Token file should be in project-dir and named \"{}\"".format(TOKEN_FILE_NAME))
+    LOGGER.error("Failed to load token")
+    LOGGER.error("Token file should be in project-dir and named \"{}\"".format(TOKEN_FILE_NAME))
     exit(ExitCode.TOKEN_FILE_NOT_FOUND)
 
 # Initialize bot

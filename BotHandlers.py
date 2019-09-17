@@ -22,7 +22,7 @@ class BotHandlers:
 
     @staticmethod
     def error_handler(update: Update, context: CallbackContext):
-        LOGGER.error("An error occurred! Update {} caused {} error.".format(
+        LOGGER.error("A telegram-bot error occurred! Update <{}> caused <{}> error.".format(
             update.update_id if update else "[Null Updater]",
             context.error
         ))
@@ -69,6 +69,7 @@ class BotHandlers:
             LOGGER.debug("/uid command rejected: " + uid)
             return
         uid = "".join(findall(r"\d", uid))
+        LOGGER.info("/uid {}".format(uid))
 
         # Query all PID under UID, then validate result
         all_pid = sorted(PixivHelper.get_all_pid_by_uid(uid), reverse=True)
@@ -89,7 +90,7 @@ class BotHandlers:
         # Send each PID
         for pid in all_pid:
             BotHandlers._send_compressed_image_of_pid(update, context, pid)
-        LOGGER.info("/uid {} success".format(uid))
+        LOGGER.info("Success: /uid {}".format(uid))
 
     @staticmethod
     def downpid(update: Update, context: CallbackContext):
@@ -116,6 +117,7 @@ class BotHandlers:
             LOGGER.debug("/pid command rejected: " + pid)
             return
         pid = "".join(findall(r"\d", pid))
+        LOGGER.info("/downpid {}".format(pid))
 
         # Try find image locally, if N/A then call API to download
         artworks_dir = db.search(pid)
@@ -146,7 +148,7 @@ class BotHandlers:
                         text=BotMsg.CMD_DOWNPID_ERR_FAIL_TO_SEND,
                         chat_id=update.message.chat_id
                     )
-            LOGGER.info("/pid {} success".format(pid))
+            LOGGER.info("Success: /pid {}".format(pid))
             return
 
     @staticmethod
@@ -174,11 +176,12 @@ class BotHandlers:
             LOGGER.debug("/pid command rejected: " + pid)
             return
         pid = "".join(findall(r"\d", pid))
+        LOGGER.info("/pid {}".format(pid))
         # photo_caption = PIXIV_SHORT_LINK_TEMPLATE.format(pid)
 
         # Send artworks of pid
         BotHandlers._send_compressed_image_of_pid(update, context, pid)
-        LOGGER.info("/pid {} success".format(pid))
+        LOGGER.info("Success: /pid {}".format(pid))
 
     @staticmethod
     def search(update: Update, context: CallbackContext):
@@ -219,6 +222,7 @@ class BotHandlers:
             LOGGER.debug("/search command rejected: lacking args")
             return
         keyword = keyword[:SEARCH_MODE_KEYWORD_LENGTH_LIMIT]
+        LOGGER.info("/search {}".format(keyword))
 
         # Call crawler
         try:
@@ -240,13 +244,14 @@ class BotHandlers:
             return
         for pid in pids:
             BotHandlers._send_compressed_image_of_pid(update, context, pid)
-        LOGGER.info("/search {} success".format(keyword))
+        LOGGER.info("Success: /search {}".format(keyword))
 
     @staticmethod
     def remilia(update: Update, context: CallbackContext):
         """
         Crawl レミリア・スカーレット image and send a random one
         """
+        LOGGER.info("/remilia")
         pid = Remilia().get()
         if not pid:
             context.bot.send_message(
@@ -256,7 +261,7 @@ class BotHandlers:
             LOGGER.error("/remilia rejected, can't find any pid of her")
             return
         BotHandlers._send_compressed_image_of_pid(update, context, pid)
-        LOGGER.info("/remilia succeed")
+        LOGGER.info("Success: /remilia")
 
     @staticmethod
     def _send_compressed_image_of_pid(update: Update, context: CallbackContext, pid):
@@ -275,7 +280,7 @@ class BotHandlers:
                     chat_id=update.message.chat_id,
                     reply_to_message_id=update.message.message_id
                 )
-                LOGGER.debug("send pid rejected: PID query failure")
+                LOGGER.debug("Send pid rejected: PID query failure")
                 return
             else:  # web query succeed, write to local db
                 db.add(artworks)
@@ -303,4 +308,4 @@ class BotHandlers:
                     photo=open(artworks_dir[0], "rb"),
                     caption=short_link
                 )
-            LOGGER.info("Send pid {} success".format(pid))
+            LOGGER.debug("Success: send pid {}".format(pid))

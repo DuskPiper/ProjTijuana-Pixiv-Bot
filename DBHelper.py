@@ -59,7 +59,7 @@ class DBHelper:
             else:
                 self.size += 1
                 self.size_in_bytes += getsize(file_path)
-                LOGGER.info("Saved image: " + image_name)
+                LOGGER.debug("Saved image: " + image_name)
         self.pid_to_uid[artworks.pid] = artworks.uid
         return True
 
@@ -96,7 +96,7 @@ class DBHelper:
             except IOError:
                 LOGGER.error("Failed to delete empty UID folder " + uid)
             else:
-                LOGGER.info("Deleted empty UID folder" + uid)
+                LOGGER.debug("Deleted empty UID folder" + uid)
 
     def search(self, pid):
         """
@@ -130,7 +130,7 @@ class DBHelper:
                 self.size_in_bytes += getsize(join(uid_dir, image_name))
                 self.pid_to_uid[pid] = uid
         self._validate_history()
-        LOGGER.info("Updated DB")
+        LOGGER.debug("Updated DataBase")
         self.print_db_status()
 
     def _update_history(self, pid):
@@ -154,6 +154,7 @@ class DBHelper:
                 self.history.remove(pid)
 
 
+LOGGER.info("Database initializing...")
 db = DBHelper()  # Singleton, initialized ASAP
 LOGGER.info("Database initialized")
 

@@ -43,6 +43,7 @@ class PixivSearchCrawler:
                     self.pids[pid] = bookmarks
 
     def crawl(self, safemode=True):
+        LOGGER.debug("Crawling: " + self.keyword)
         url_template = PIXIV_SEARCH_PAGE_SAFE_TEMPLATE if safemode else PIXIV_SEARCH_PAGE_TEMPLATE
         urls = []
         for page in range(1, 1 + self.pages // len(self.keyword_add_on)):
