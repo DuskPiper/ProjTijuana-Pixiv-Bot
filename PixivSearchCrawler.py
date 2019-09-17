@@ -24,6 +24,8 @@ class PixivSearchCrawler:
         self.pids = {}  # {PixivID : #Bookmarks}
         self.lock = threading.Lock()
         self.pages = pages
+        self.keyword_add_on = \
+            (" 10000users入り", " 5000users入り", " 1000users入り", " 500users入り", "")
 
     def _crawl_single_page(self, url):
         req = requests.get(url, headers=DEFAULT_HEADER, cookies=COOKIES).text
@@ -42,7 +44,10 @@ class PixivSearchCrawler:
 
     def crawl(self, safemode=True):
         url_template = PIXIV_SEARCH_PAGE_SAFE_TEMPLATE if safemode else PIXIV_SEARCH_PAGE_TEMPLATE
-        urls = [url_template.format(self.keyword, page + 1) for page in range(self.pages)]
+        urls = []
+        for page in range(1, 1 + self.pages // len(self.keyword_add_on)):
+            for add_on in self.keyword_add_on:
+                urls.append(url_template.format(self.keyword + add_on, page))
         with ThreadPoolExecutor(PIXIV_SEARCH_CRAWLER_THREADS_LIMIT) as executor:
             executor.map(self._crawl_single_page, urls)
         return sorted(self.pids, key=lambda entry: entry[1])[:self.num_results]

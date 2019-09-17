@@ -38,8 +38,8 @@ REMILIA_FILE_NAME = "remilia"
 UID_MODE_LIMIT = 5  # maximum PIDs queried
 SEARCH_MODE_LIMIT = 5  # maximum search results
 SEARCH_MODE_PAGE_LIMIT = 28  # maximum crawler pages
-SEARCH_MODE_KEYWORD_LENGTH_LIMIT = 40  # keyword string longer than this will be cropped
-PIXIV_SEARCH_CRAWLER_THREADS_LIMIT = 4  # maximum threads used to crawl search page
+SEARCH_MODE_KEYWORD_LENGTH_LIMIT = 30  # keyword string longer than this will be cropped
+PIXIV_SEARCH_CRAWLER_THREADS_LIMIT = 5  # maximum threads used to crawl search page
 
 
 class ExitCode(Enum):
@@ -52,13 +52,13 @@ class BotMsg:
               "I am here to help you look for artworks from pixiv.net easily" \
               "To see all supported commands, use /help "
     HELP = "Below are commands I can understand\n" \
-           "`/help           `show this message again\n" \
-           "`/pid [PID]      `artworks of given PixivID\n" \
-           "`/uid [UID]      `recent artworks of given account\n" \
-           "`/search [words] `search for key words\n" \
-           "`/erosearch [w.] `careful, results may contain 18x contents\n" \
-           "`/remilia        `a random レミリア artwork\n" \
-           "`/downpid [PID]  `original-sized artworks for download\n\n" \
+           "/help            show this message again\n" \
+           "/pid [PID]       artworks of given PixivID\n" \
+           "/uid [UID]       recent artworks of account\n" \
+           "/search [words]  search for key words\n" \
+           "/erosearch [w.]  careful, may contain 18x contents\n" \
+           "/remilia         a random レミリア artwork\n" \
+           "/downpid [PID]   original-sized artworks for download\n\n" \
            "More functions to be delivered soon, enjoy!"
 
     CMD_PID_WARN_EMPTY_PID = "Please send me a PixivID number after \"/pid\" "
