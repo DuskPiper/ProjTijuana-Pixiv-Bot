@@ -39,6 +39,10 @@ Currently available commands are listed below.
 
 ## Versions
 
+#### 0.5.5
+
+- Bug fixes
+
 #### 0.5.2
 
 - New feature: `/erosearch` , search results may contain NSFW contents

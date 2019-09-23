@@ -4,7 +4,8 @@
 
 from Constants import *
 from PixivArtworks import PixivArtworks
-from PixivSearchCrawler import PixivSearchCrawler
+# from PixivSearchCrawler import PixivSearchCrawler
+from urllib.error import HTTPError
 
 from urllib import request
 from re import findall
@@ -44,7 +45,10 @@ class PixivHelper:
         header = DEFAULT_HEADER.copy()
         header["Referer"] = PID_PAGE_TEMPLATE.format(pid)
         url = PID_AJAX_TEMPLATE.format(pid)
-        result = http(url, header)
+        try:
+            result = http(url, header)
+        except HTTPError:
+            return None
         all_raw_image_url = set(findall('"url_big":"[^"]*"', result))
         all_image_url = [str(iurl.replace('\\', '').split(':', 1)[-1]).strip('"') for iurl in all_raw_image_url]
         uid = str(findall('"user_id":"[^"]*"', result)[0].split(':', 1)[-1].strip('"'))
